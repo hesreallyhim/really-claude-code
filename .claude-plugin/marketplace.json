@@ -1,0 +1,26 @@
+{
+  "name": "really-claude-code",
+  "owner": {
+    "name": "Really Him",
+    "email": "contact@hesreallyhim.com"
+  },
+  "metadata": {
+    "description": "Claude Code plugins that explore the possibilities of autonomy and self-guided behavior for coding agents"
+  },
+  "plugins": [
+    {
+      "name": "context-awareness",
+      "source": "./plugins/context-awareness",
+      "description": "Hooks that provide Claude with feedback about its own context budget throughout a session, enabling adaptive, context-aware planning and resource conservation",
+      "category": "autonomous-agents",
+      "tags": [
+        "hooks",
+        "context",
+        "context-engineering",
+        "agentic-awareness",
+        "autonomous-agents",
+        "budget-aware-LLMs"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+# context-awareness plugin configuration
+#
+# Providers control which data sources are included in notifications.
+# Guidelines control what behavioral guidance is injected at session start.
+#
+# To customize: copy this file to $CLAUDE_PLUGIN_DATA/config.yaml
+# or use the /context-awareness:config command.
+
+providers:
+  context:
+    enabled: true
+
+  cost:
+    enabled: false
+    # Session budget in USD. Required when enabled.
+    # Notifications will show spend, burn rate, and remaining budget.
+    session_budget: null
+
+  rate_limits:
+    enabled: false
+    # Track 5-hour and 7-day API rate limit usage.
+    # No configuration needed — thresholds are defined by the API.
+
+# Path to custom guidelines markdown, or "default" for built-in.
+# Custom guidelines completely replace the defaults — they are not merged.
+guidelines: default

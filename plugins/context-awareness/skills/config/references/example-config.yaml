@@ -1,0 +1,18 @@
+# Example: all providers enabled with a $5 session budget.
+#
+# Copy this file to $CLAUDE_PLUGIN_DATA/config.yaml to use it,
+# or run /context-awareness:config change to set values interactively.
+
+providers:
+  context:
+    enabled: true
+
+  cost:
+    enabled: true
+    session_budget: 5.00
+
+  rate_limits:
+    enabled: true
+
+# Custom guidelines — replace with your own file path, or use "default".
+guidelines: default
