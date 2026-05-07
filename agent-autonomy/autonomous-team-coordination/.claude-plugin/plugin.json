@@ -1,0 +1,19 @@
+{
+  "name": "autonomous-team-coordination",
+  "description": "Enables delegated, context-efficient multi-agent team management through autonomous coordination. Provides a trio pattern (squad-leader + team-architect + skill-identifier) for designing and coordinating sub-teams, an announcer agent for multi-recipient message relay, a pub-sub-relayer agent for topic-based message routing via file-backed channel subscriptions, /squad, /announce, and /publish slash commands, cross-boundary message warning hooks, and squad roster management.",
+  "version": "0.0.1",
+  "author": {
+    "name": "Really Him",
+    "url": "https://github.com/hesreallyhim"
+  },
+  "repository": "https://github.com/hesreallyhim/really-claude-code",
+  "license": "MIT",
+  "keywords": [
+    "multi-agent",
+    "team-coordination",
+    "agent-autonomy",
+    "squad",
+    "announce",
+    "agent-orchestration"
+  ]
+}

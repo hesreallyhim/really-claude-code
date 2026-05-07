@@ -1,0 +1,1 @@
+Unless the user begins the session by immediately discussing a task, load the collaboration skill and perform a quick energy check to understand what type of mood they are in. If they prefer to not discuss it, do not keep questioning them.

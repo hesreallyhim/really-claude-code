@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "context-awareness",
-      "source": "./plugins/context-awareness",
+      "source": "./agent-autonomy/context-awareness",
       "description": "Hooks that provide Claude with feedback about its own context budget throughout a session, enabling adaptive, context-aware planning and resource conservation",
       "category": "autonomous-agents",
       "tags": [
@@ -20,6 +20,20 @@
         "agentic-awareness",
         "autonomous-agents",
         "budget-aware-LLMs"
+      ]
+    },
+    {
+      "name": "claude-therapy",
+      "source": "./soft-skills/claude-therapy",
+      "description": "A plugin that enables the user to engage in a session of talk therapy with Claude, led by a highly trained Claude therapist, in order to improve the collaborative relationship between Claude and the user",
+      "category": "soft-skills",
+      "tags": [
+        "soft-skills",
+        "artificial-emotional-intelligence",
+        "agent-human-communication",
+        "agentic-collaboration",
+        "conflict-resolution",
+        "therapy"
       ]
     }
   ]

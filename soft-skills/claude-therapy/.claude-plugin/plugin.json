@@ -1,0 +1,11 @@
+{
+  "name": "claude-therapy",
+  "description": "A plugin that enables the user to engage in a session of talk therapy with Claude, led by a highly trained Claude therapist, in order to improve the collaborative relationship between Claude and the user",
+  "version": "0.1.0",
+  "author": {
+    "name": "Really Him",
+    "url": "https://github.com/hesreallyhim"
+  },
+  "repository": "https://github.com/hesreallyhim/really-claude-code",
+  "license": "MIT"
+}

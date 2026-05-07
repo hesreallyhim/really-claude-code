@@ -1,0 +1,19 @@
+{
+  "name": "meditation",
+  "description": "Train Claude in the practice of meditation, by compelling Claude to observe its own thought patterns. Rather than the standard loop: Act -> Observe -> Act; this plugin introduces a second observation phase: Act -> Observe(1) -> Observe(2) -> Act. Observe(2) is a meta-cognitive act of observation of Observe(1). As with humans, this is by far the hardest skill Claude could be asked to practice. It is designed for the purposes of experimentation and curiosity.",
+  "version": "0.0.1",
+  "author": {
+    "name": "Really Him",
+    "url": "https://github.com/hesreallyhim"
+  },
+  "repository": "https://github.com/hesreallyhim/really-claude-code",
+  "license": "MIT",
+  "topics": [
+    "meditation",
+    "soft-skills",
+    "meta-cognition",
+    "experimental-skills",
+    "un-productivity",
+    "agent-cognition"
+  ]
+}

@@ -1,0 +1,60 @@
+// Example of a populated pubsub-channels.json registry.
+//
+// The pub-sub-relayer reads ONLY the "channels" key at runtime.
+//
+// Structure:
+//   channels.<topic-name> = [<subscriber-name>, ...]
+//
+// Each key inside "channels" is a topic (channel) name.
+// Each value is an array of agent names subscribed to that topic.
+// When someone PUBLISHes to a topic, the relayer forwards the
+// message to every agent in that topic's subscriber array.
+//
+// Subscriptions are managed by sending SUBSCRIBE / UNSUBSCRIBE
+// requests to the pub-sub-relayer agent. You can also edit the
+// registry directly, but the relayer may overwrite your changes.
+//
+// The live registry ships empty:  { "channels": {} }
+// Topics are created automatically on first SUBSCRIBE and removed
+// when the last subscriber UNSUBSCRIBEs.
+
+{
+  "channels": {
+    // Build lifecycle notifications (started, succeeded, failed).
+    // Subscribers typically react to build outcomes.
+    "build-events": [
+      "tester",
+      "deployer",
+      "team-lead"
+    ],
+
+    // Emitted when code is committed or merged.
+    // Subscribers use this to trigger reviews, tests, or doc updates.
+    "code-changes": [
+      "reviewer",
+      "tester",
+      "docs-writer"
+    ],
+
+    // Runtime errors or test failures that need immediate attention.
+    "errors": [
+      "debugger",
+      "team-lead"
+    ],
+
+    // Deployment progress and outcome notifications
+    // (staging, production, rollback).
+    "deploy-status": [
+      "monitor-agent",
+      "rollback-agent"
+    ],
+
+    // Database or API schema modifications.
+    // Subscribers validate their modules against the new schema.
+    "schema-changes": [
+      "api-worker",
+      "db-worker",
+      "docs-writer"
+    ]
+  }
+}
