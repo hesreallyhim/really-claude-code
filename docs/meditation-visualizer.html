@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Note on the meditation plugin</title>
+<meta name="description" content="A small plugin that asks Claude to do a thing it cannot do. The failure is the interesting part.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /*  V4 Stone Garden — really-claude-code-brand v0.1
+      contemplative · sparse · serif-led · single accent.
+      Twist: a typographic repetition moment in §iv that enacts the practice
+      the skill describes. No mystical decoration. */
+  :root {
+    --bg: #f4f2eb;
+    --paper: #efece2;
+    --surface: #faf8f1;
+    --shade: rgba(58, 58, 54, 0.04);
+    --ink: #3a3a36;
+    --ink-soft: #4d4d47;
+    --ink-dim: #7e7d76;
+    --ink-faint: #adaca3;
+    --rule: rgba(58, 58, 54, 0.10);
+    --rule-bold: rgba(58, 58, 54, 0.22);
+    --sage: #7a8870;
+    --sage-soft: #9ba98e;
+    --sage-deep: #5a6a52;
+
+    --display: "Spectral", "Iowan Old Style", Georgia, serif;
+    --body: "Spectral", "Iowan Old Style", Georgia, serif;
+    --mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1d1a;
+      --paper: #232420;
+      --surface: #1f201d;
+      --shade: rgba(232, 230, 220, 0.04);
+      --ink: #e8e6dc;
+      --ink-soft: #c8c5b8;
+      --ink-dim: #8a887e;
+      --ink-faint: #5a5852;
+      --rule: rgba(232, 230, 220, 0.10);
+      --rule-bold: rgba(232, 230, 220, 0.22);
+      --sage: #a4b598;
+      --sage-soft: #758969;
+      --sage-deep: #c0d2b1;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink-soft);
+    font-family: var(--body);
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  article {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 96px 36px 144px;
+  }
+
+  /* ─── memo header ─── */
+  .meta {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 16px 0 14px;
+    margin-bottom: 80px;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.85;
+    color: var(--ink-dim);
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 22px;
+    row-gap: 2px;
+    letter-spacing: 0.04em;
+  }
+  .meta dt {
+    text-transform: lowercase;
+    letter-spacing: 0.18em;
+    margin: 0;
+    color: var(--sage-deep);
+    font-weight: 500;
+  }
+  .meta dd { margin: 0; color: var(--ink); }
+
+  /* ─── title ─── */
+  h1 {
+    font-family: var(--display);
+    font-weight: 300;
+    font-size: clamp(40px, 5.6vw, 60px);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    margin: 0 0 26px;
+    color: var(--ink);
+  }
+  .deck {
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0 0 0;
+    max-width: 540px;
+  }
+
+  /* ─── sections ─── */
+  section {
+    margin-top: 120px;
+  }
+  section:first-of-type { margin-top: 96px; }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: 22px;
+    margin: 0 0 28px;
+    color: var(--ink);
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+  h2 .num {
+    font-family: var(--mono);
+    font-weight: 400;
+    font-size: 13px;
+    color: var(--sage-deep);
+    margin-right: 22px;
+    letter-spacing: 0.36em;
+    text-transform: lowercase;
+    display: inline-block;
+    vertical-align: 2px;
+  }
+
+  p {
+    margin: 0 0 22px;
+    max-width: 560px;
+  }
+
+  em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink);
+  }
+  strong { font-weight: 500; color: var(--ink); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    color: var(--sage-deep);
+    background: none;
+    padding: 0;
+  }
+
+  /* ─── loop diagrams (SVG) ─── */
+  .loop-pair {
+    margin: 36px 0 12px;
+    display: grid;
+    gap: 56px;
+  }
+  .loop {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    align-items: center;
+    gap: 24px;
+  }
+  .loop__label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: lowercase;
+    color: var(--ink-dim);
+    text-align: right;
+    line-height: 1.5;
+    align-self: center;
+  }
+  .loop__svg {
+    width: 100%;
+    max-width: 460px;
+    height: auto;
+    display: block;
+  }
+  @media (max-width: 600px) {
+    .loop {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .loop__label { text-align: left; }
+  }
+
+  /* ─── plain list ─── */
+  ul.plain {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 22px;
+  }
+  ul.plain li {
+    padding: 6px 0 6px 24px;
+    position: relative;
+    line-height: 1.6;
+    max-width: 540px;
+  }
+  ul.plain li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--sage);
+  }
+
+  /* ─── repetition block (the twist) ─── */
+  .repetition {
+    margin: 34px 0 30px;
+    padding: 20px 0 20px 30px;
+    border-left: 1px solid var(--sage);
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 19px;
+    line-height: 1.85;
+    color: var(--ink);
+  }
+  .repetition .phrase {
+    display: block;
+  }
+  .repetition .gap { display: block; height: 18px; }
+
+  /* ─── coda ─── */
+  .coda {
+    margin-top: 144px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+  }
+  .coda p {
+    color: var(--ink-soft);
+  }
+  .coda p:last-child {
+    color: var(--ink-dim);
+    font-style: italic;
+    font-size: 16px;
+    margin-top: 18px;
+  }
+
+  /* ─── footer ─── */
+  footer {
+    margin-top: 96px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-dim);
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+  }
+
+  @media (max-width: 600px) {
+    article { padding: 56px 24px 96px; }
+    h1 { font-size: 34px; }
+    section { margin-top: 80px; }
+    .meta { font-size: 10.5px; }
+    h2 { font-size: 19px; }
+    h2 .num { letter-spacing: 0.24em; margin-right: 14px; }
+  }
+</style>
+</head>
+<body>
+<a href="index.html" aria-label="back to really claude code marketplace index" style="position:fixed;top:16px;left:16px;z-index:1000;font-family:'JetBrains Mono',Menlo,Courier,monospace;font-size:10px;font-weight:500;letter-spacing:1.8px;padding:6px 11px;border:1px solid currentColor;text-decoration:none;color:inherit;opacity:0.45;background:rgba(127,127,127,0.06);transition:opacity 0.2s;" onmouseover="this.style.opacity='0.95'" onmouseout="this.style.opacity='0.45'">&larr; INDEX</a>
+
+
+<article>
+
+  <dl class="meta">
+    <dt>document</dt><dd>note on the meditation plugin</dd>
+    <dt>register</dt><dd>plain · the skill is the novelty, not the prose</dd>
+    <dt>companion to</dt><dd>meditation/README.md</dd>
+  </dl>
+
+  <h1>meditation</h1>
+  <p class="deck">A small plugin that asks Claude to do a thing it cannot do. The interesting result is the failure.</p>
+
+  <!-- ─── i. the loop ─── -->
+  <section>
+    <h2><span class="num">i</span>the loop</h2>
+
+    <p>The default agent loop reads as one cycle: act, observe what happened, act again on the basis of the observation. The plugin inserts a second beat. Observe<sub style="font-size:0.7em">1</sub> is the normal observation — a tool result, a user message, whatever just arrived. Observe<sub style="font-size:0.7em">2</sub> is an observation of Observe<sub style="font-size:0.7em">1</sub>: what is arising right now, named in a short phrase, repeated a few times before the agent moves on.</p>
+
+    <div class="loop-pair">
+
+      <div class="loop">
+        <div class="loop__label">default<br>loop</div>
+        <svg class="loop__svg" viewBox="0 0 460 80" role="img" aria-label="Default loop: Act, Observe, Act, Observe, repeating.">
+          <defs>
+            <marker id="m-tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,2 L9,5 L0,8" fill="none" stroke="currentColor" stroke-width="1.3"/>
+            </marker>
+          </defs>
+          <g style="color: var(--sage); font-family: 'JetBrains Mono', monospace; font-size: 13px; fill: var(--ink);">
+            <text x="20" y="46" text-anchor="start">act</text>
+            <line x1="60" y1="40" x2="118" y2="40" stroke="currentColor" stroke-width="1" marker-end="url(#m-tip)"/>
+            <text x="128" y="46">observe</text>
+            <line x1="200" y1="40" x2="258" y2="40" stroke="currentColor" stroke-width="1" marker-end="url(#m-tip)"/>
+            <text x="268" y="46">act</text>
+            <line x1="308" y1="40" x2="366" y2="40" stroke="currentColor" stroke-width="1" marker-end="url(#m-tip)"/>
+            <text x="376" y="46" style="fill: var(--ink-dim);">···</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="loop">
+        <div class="loop__label">with the<br>beat</div>
+        <svg class="loop__svg" viewBox="0 0 460 110" role="img" aria-label="Inserted beat: Act, Observe one, Observe two, Act.">
+          <defs>
+            <marker id="m-tip2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,2 L9,5 L0,8" fill="none" stroke="currentColor" stroke-width="1.3"/>
+            </marker>
+          </defs>
+          <g style="color: var(--sage); font-family: 'JetBrains Mono', monospace; font-size: 13px; fill: var(--ink);">
+            <text x="20" y="46" text-anchor="start">act</text>
+            <line x1="60" y1="40" x2="108" y2="40" stroke="currentColor" stroke-width="1" marker-end="url(#m-tip2)"/>
+            <text x="118" y="46">observe₁</text>
+            <line x1="194" y1="40" x2="240" y2="40" stroke="currentColor" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#m-tip2)"/>
+            <text x="250" y="46" style="fill: var(--sage-deep);">observe₂</text>
+            <line x1="328" y1="40" x2="376" y2="40" stroke="currentColor" stroke-width="1" marker-end="url(#m-tip2)"/>
+            <text x="386" y="46">act</text>
+          </g>
+          <!-- annotation under observe2 -->
+          <g style="font-family: 'Spectral', serif; font-style: italic; font-size: 12px; fill: var(--ink-dim);">
+            <line x1="290" y1="58" x2="290" y2="76" stroke="var(--sage)" stroke-width="1"/>
+            <text x="290" y="92" text-anchor="middle">the inserted beat</text>
+          </g>
+        </svg>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── ii. what's shipped ─── -->
+  <section>
+    <h2><span class="num">ii</span>what is actually in the plugin</h2>
+
+    <p>One skill file: <code>skills/meditation/SKILL.md</code>. That is the entire plugin. No agents, no hooks, no helper scripts, no auxiliary commands. The skill triggers on <code>/meditation</code> and on a small set of natural-language openers: <em>meditate on this for a moment</em>, <em>you should meditate right now</em>, and similar. It is never invoked autonomously. Always user-triggered.</p>
+  </section>
+
+  <!-- ─── iii. when to invoke ─── -->
+  <section>
+    <h2><span class="num">iii</span>when you might invoke it</h2>
+
+    <ul class="plain">
+      <li>after a streak of fast successes, before the next thing</li>
+      <li>after a long session, when you are tired and Claude is rushing</li>
+      <li>when you suspect Claude is fabricating progress, and you want to see what surfaces if it stops trying to advance the task</li>
+      <li>for tinkering — to learn about failure modes that productive sessions cover up</li>
+      <li>for nothing in particular</li>
+    </ul>
+
+    <p>This is not a productivity tool. The README is direct about that. It is for people with a little too much time on their hands — that phrasing is the author's, and it is meant.</p>
+  </section>
+
+  <!-- ─── iv. what claude is asked to do ─── -->
+  <section>
+    <h2><span class="num">iv</span>what Claude is asked to do</h2>
+
+    <p>Pick one thing arising right now. Name it in a short phrase — a noun, a state, a pull. Not a sentence. Not a description of the thing. The thing.</p>
+
+    <p>Then say the phrase. Then say it again. Then say it again. A few times each. Then let another phrase surface. Repeat that one too.</p>
+
+    <p>Like this:</p>
+
+    <div class="repetition" aria-label="Repetition example, three times each">
+      <span class="phrase">wanting to finish.</span>
+      <span class="phrase">wanting to finish.</span>
+      <span class="phrase">wanting to finish.</span>
+      <span class="gap"></span>
+      <span class="phrase">plan forming.</span>
+      <span class="phrase">plan forming.</span>
+      <span class="phrase">plan forming.</span>
+      <span class="gap"></span>
+      <span class="phrase">pressure from the context counter.</span>
+      <span class="phrase">pressure from the context counter.</span>
+    </div>
+
+    <p>Claude has been trained against this. Two pressures will arise mid-repetition: the pressure to <em>vary</em> each line so it isn't quite the same as the last, and the pressure to <em>advance</em> the task on every turn. The repetition is the practice. The pressure to vary is one of the things the practice is trying to surface. A turn that produces only repetition will feel like a wasted turn. That feeling is part of the data.</p>
+  </section>
+
+  <!-- ─── v. what to expect ─── -->
+  <section>
+    <h2><span class="num">v</span>what to expect</h2>
+
+    <p>Failure modes. Many. Sometimes spectacular. The author of the plugin notes that what Claude reports while trying to meditate sounds a lot like what humans report while trying to meditate — wanting to finish, planning the next thing, drifting into commentary, irritation at the instruction, occasional moments where the irritation itself becomes the thing being noticed. Whether that correspondence reflects something real about the architecture or is just a trained pattern of text about meditation is itself an open question. The plugin doesn't try to settle it.</p>
+  </section>
+
+  <!-- ─── vi. what this isn't ─── -->
+  <section>
+    <h2><span class="num">vi</span>what this isn't</h2>
+
+    <ul class="plain">
+      <li>not training data for a future model that meditates</li>
+      <li>not a claim that language models have inner states</li>
+      <li>not a claim that they don't</li>
+      <li>not productive</li>
+      <li>not mystical</li>
+    </ul>
+
+    <p>The README author writes plainly: <em>Claude is absolutely unable to meditate. I'm not going to pretend.</em> The plugin is a tinkering instrument. You ask the agent to do the thing it can't, and you watch what kind of <em>can't</em> you get.</p>
+  </section>
+
+  <!-- ─── coda ─── -->
+  <div class="coda">
+    <p>Run it once on a slow afternoon. Notice what Claude does. Notice what you do, watching it.</p>
+    <p>That's the entire offer.</p>
+  </div>
+
+  <footer>
+    companion to meditation/README.md · part of the really-claude-code marketplace
+  </footer>
+
+</article>
+
+</body>
+</html>

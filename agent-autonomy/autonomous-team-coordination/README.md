@@ -1,14 +1,35 @@
-# Autonomous Team Coordination Plugin
+<p align="center">
+  <img src="assets/banner.svg" alt="autonomous-team-coordination — two models, one feature: AUTHORITARIAN (leader at the top) ≠ DISTRIBUTED (facilitator at the hub)" width="100%">
+</p>
 
-A Claude Code plugin that enables autonomous multi-agent team management and collaboration patterns using only the native Claude Code agent teams feature.
+# Autonomous Team Coordination
+
+A dynamic, multi-layered orchestration system that extends the Claude Code agent teams feature in a few simple but profound ways, making it a far more powerful feature than a user may be otherwise be led to believe.
+
+> [!NOTE]
+> At the time of writing, agent teams are an opt-in, experimental feature. For this reason, we encourage you to set Opus as the default agent for every squad member, however, you may state which model you wish to be the default when invoking the `/squad` command.
 
 ## Quickstart
 
-No.
+[FILL THIS IN WITH STANDARD PLUGIN/MARKETPLACE INSTRUCTIONS]
 
-## Installation
+## The "Aha" Section
 
-TODO
+Claude Code documentation about agent teams is rather strict, and presents them as a useful alternative to subagents, given certain conditions. I believe this is a gross understatement. First, there exist many elaborate agent orchestators that enable agents to cooperate and organize themselves according to non-trivial rules and patterns. These orchestrators may be more or less ergonomic, but I don't think a consensus format has been decided for how to describe an agent "team".
+
+It seems as though Claude Code has eliminated the need for such systems to a large extent. With a grain of salt and light tolerance for instability (and even chaos, maybe), a user can now assemble a team of agents of diverse roles, and instruct Claude to deploy them in impressively complex patterns. I'm not sure to what extent Sonnet is capable of performing this role, but I can simply describe to Claude extremely complicated agent structures, with many phases, handoffs, roles, etc., and it is highly reliable in actualizing those instructions. Furthermore, the agents are able to directly communicate with each other, solve problems on the spot, and recover from failure admirably well. And if you are using a terminal emulator that supports it, even the user can directly observe and send messages to the individual agents.
+
+### What the Docs Leave Out
+
+According to the official documentation about agent teams: (i) there can be at most one active team at a time; (ii) teammates cannot spawn their own teams/teammates; (iii) nested team structures are not possible; (iv) only "Main Claude" (the session Claude) can lead a team; (v) teams cannot change leadership in the middle of a session.
+
+These claims are all false. They are based on a conflation of two different capacities - (i) the ability to lead a team (i.e., coordinate and manage the work of other Claude Code agents), and (ii) the ability to _create_ a team and to create, or spawn, agents for such a team. It's true that only Main Claude is able to use the TeamCreate, TeamDelete, and Agent (spawn) tools. But there's no technical requirement that the agent who does the spawning is the one who does the leading. That is the core insight that drives this entire plugin.
+
+Claudes are pretty nice to each other, for the most part. So if Main Claude creates a team and then says to everyone, "OK, Alpha here is going to be leading the team today, so it will be managing your tasks", the rest of the Claudes do not revolt. They cheerfully continue their work under the leadership of some other Claude (can they really tell the difference?), which violates rule (iv) above. Furthermore, Main Claude is _such_ a nice Claude that if Alpha asks it to kindly spawn some agents, Main Claude will do it. So rule (ii) is true _de jure_, but isn't true in any thick sense if the one who spawns is willing to do so because a teammate asked it to. Another convenient thing, is that Claude can spawn more agents at any time throughout the session - the team does not have to be generated all at once.
+
+This is the whole genesis of the squad pattern - decoupling spawning and leading. Main Claude spawns the Squad Leader, the Squad Leader leads its own "squad" (i.e., team). Once you've got this working, there's nothing stopping you from having Claude spawn two Squad Leaderss, each leading their own team at the same time. They can decide to switch roles, so some other agent gets "promoted" to Squad Leader. They can work in a layered fashion where one squad is building code that's functionally nested . So basically all of (i)-(v) above turn out to be false. And because Main Claude is now mostly a passive "Queen Bee", consuming very few tokens, and the rest of the squad members are agents that can switched out if their context window gets depleted, you can imagine a rotating cast of squads that are able to communicate, collaborate, work in tandem, and basically plow their way through an entire codebase.
+
+So that's one thing you can do with Claude Code agent teams.
 
 ## Usage
 
@@ -31,26 +52,6 @@ What happens:
 
 The team-lead's context stays clean throughout. It only processes the initial spawn request and the final completion report.
 
-### The `/announce` Command
-
-Use `/announce` to send a message to multiple specific agents without broadcasting to the entire team.
-
-```
-/announce [worker-api, worker-db, worker-auth] The shared config schema has changed. Pull latest and re-validate.
-```
-
-This spawns the `announcer` agent (if not already active), which parses the recipient list and forwards the message individually to each named agent.
-
-### The `/publish` Command
-
-Use `/publish` to send a message to all subscribers of a pub/sub topic.
-
-```
-/publish build-events Build succeeded for commit abc123. Artifacts at dist/.
-```
-
-This spawns the `pub-sub-relayer` agent (if not already active), which reads the channel registry at `${CLAUDE_PLUGIN_ROOT}/state/pubsub-channels.json`, looks up subscribers for the topic, and forwards the message to each of them. The publisher does not need to know who is subscribed.
-
 ### Direct Agent Usage
 
 You can also spawn agents directly without slash commands:
@@ -58,27 +59,16 @@ You can also spawn agents directly without slash commands:
 - Spawn a `squad-leader` for any task that needs a coordinated sub-team.
 - Spawn a `team-architect` standalone when you need a team design document without executing it.
 - Spawn a `skill-identifier` standalone when you need a capability gap analysis.
-- Spawn an `announcer` when any agent needs to fan out messages to a subset of the team.
 
 ## The Trio Pattern
 
 The trio pattern is the core workflow of this plugin. It separates concerns across three specialized agents:
 
-```
-                    +-----------------+
-                    |  SQUAD-LEADER   |  <-- orchestration only, no domain expertise
-                    +--------+--------+
-                             |
-                    consults | both
-                   +---------+---------+
-                   |                   |
-           +-------+-------+  +-------+--------+
-           | TEAM-ARCHITECT |  | SKILL-IDENTIFIER|
-           | (patterns)     |  | (capabilities)  |
-           +---------------+  +----------------+
-```
+<p align="center">
+  <img src="assets/trio-pattern.svg" alt="Trio pattern organizational chart" width="640">
+</p>
 
-**Squad-leader** -- Pure orchestration. Receives the task, consults the other two agents, synthesizes a spawn request, and then coordinates whatever workers get spawned. Has no domain expertise of its own.
+**Squad-leader** -- The team's coordinator. Its expertise is in facilitating consultation between peers, synthesizing their input into a structured spawn request, dispatching tasks, unblocking stuck workers, escalating cleanly to the team-lead, and absorbing coordination chatter so the team-lead's context stays clean. *Coordination is the expertise* — domain calls belong to the workers or to domain experts the squad-leader can route to.
 
 **Team-architect** -- Selects the optimal team pattern (e.g., supervisor-worker, pipeline, fan-out) and communication topology based on the task's traits (urgency, complexity, knowledge needs, risk). References the `team-patterns` skill.
 
@@ -99,23 +89,9 @@ If all four are met, the squad-leader constructs the spawn request directly, sav
 
 For projects with independent workstreams, multiple squad-leaders can run in parallel:
 
-```
-                    +------------------+
-                    |   TEAM LEAD      |  <-- minimal context: spawn requests + reports
-                    +--------+---------+
-                             |
-                 +-----------+-----------+
-                 |                       |
-          +------+------+        +------+------+
-          | SQUAD-LEAD  |        | SQUAD-LEAD  |
-          | (backend)   |        | (frontend)  |
-          +------+------+        +------+------+
-                 |                       |
-          +------+------+        +------+------+
-          |      |      |        |      |      |
-         API   Data  Review    UI    State  Review
-         Eng   Eng   Gate      Eng   Eng    Gate
-```
+<p align="center">
+  <img src="assets/multi-squad.svg" alt="Multi-squad architecture chart" width="720">
+</p>
 
 Each squad-leader:
 
@@ -128,43 +104,15 @@ Cross-team communication goes through the team-lead, not directly between squads
 
 ## Communication Protocols
 
-The plugin defines three structured message protocols. See `skills/team-coordination/references/protocols.md` for full specifications.
+The plugin defines two structured message protocols. See `skills/team-coordination/references/protocols.md` for full specifications.
 
 ### Spawn Request
 
 Sent by the squad-leader to the team-lead when requesting worker agents:
 
-```
-SPAWN REQUEST
-=============
-Task: Build REST API with auth and rate limiting
-Pattern: Supervisor-Worker with Reflection Loop
-Topology: hub-and-spoke
-Design phase: FULL
-
-AGENTS REQUESTED:
-1. Name: api-implementer
-   Type: independent-contributor
-   Model: sonnet
-   Role: Implements API endpoints and middleware
-
-2. Name: api-reviewer
-   Type: critical-code-reviewer
-   Model: opus
-   Role: Reviews all code before integration
-
-SKILLS NEEDED:
-- Existing: team-patterns -> squad-leader
-- Missing: rate-limiting-patterns -> create with skill-creator-enhanced
-
-TASK GRAPH:
-Task 1: Implement auth middleware -> Owner: api-implementer
-Task 2: Implement rate limiter -> Owner: api-implementer (blocked by: 1)
-Task 3: Review auth code -> Owner: api-reviewer (blocked by: 1)
-Task 4: Write integration tests -> Owner: api-implementer (blocked by: 2, 3)
-
-READY TO PROCEED: YES
-```
+<p align="center">
+  <img src="assets/spawn-request.svg" alt="Sample SPAWN REQUEST form" width="560">
+</p>
 
 ### Completion Report
 
@@ -196,103 +144,28 @@ Recommendations:
 - Consider adding Redis-backed rate limiting for multi-instance deployments
 ```
 
-### Announcer
-
-Any agent can send a multi-recipient message through the announcer:
-
-```
-[TO: worker-1, worker-2, worker-3]
-[FROM: squad-leader]
----
-The shared config schema has changed. Please pull the latest and re-validate your modules.
-```
-
-The announcer forwards individually to each recipient and confirms delivery back to the sender.
-
-#### Why a separate agent?
-
-Claude Code's `SendMessage` tool only supports two modes: a direct message to one recipient, or a broadcast to every teammate. There is no "send to these 3 out of 8" primitive. To message a subset, someone has to emit N individual `SendMessage` calls.
-
-If the team-lead (or any working agent) does this inline, it pays a cost:
-
-- **Context window**: N tool calls + N tool results expand the agent's context with routing boilerplate that has nothing to do with its actual work.
-- **Turn budget**: The agent spends a turn on message fan-out instead of productive work.
-- **Prompt pollution**: The N delivery confirmations clutter the conversation history for the rest of the session.
-
-The announcer absorbs all of this. It runs on haiku (cheapest model), is restricted to `SendMessage` only, and its context window is entirely disposable -- it exists solely to parse headers and fan out messages. The sending agent pays for exactly one `SendMessage` (to the announcer), and the announcer handles the rest in its own isolated context.
-
-#### How parallel delivery works
-
-When the announcer processes a relay request, it emits all N `SendMessage` calls in a single response. The runtime executes all tool calls from one response concurrently, so the forwards happen in parallel -- not sequentially. The full cycle for a relay with N recipients is:
-
-1. **Turn 1** (incoming): Announcer receives the relay request as an incoming message. No tool call needed -- the `[TO:]`, `[FROM:]`, and body are already in its prompt context.
-2. **Turn 2** (forward): Announcer emits N parallel `SendMessage` calls, one per recipient. All execute concurrently.
-3. **Turn 3** (confirm): Announcer sends exactly one `SendMessage` back to the original sender with a delivery summary.
-
-Total: 3 turns and N+1 `SendMessage` calls, regardless of recipient count. The sending agent's context grows by exactly 2 messages (its outbound relay request + the delivery confirmation).
-
-#### Pub/Sub Relayer
-
-The `pub-sub-relayer` follows the same disposable-agent pattern but adds topic-based routing. Instead of the sender listing recipients explicitly, it publishes to a topic and the relayer looks up subscribers from a file-backed registry at `${CLAUDE_PLUGIN_ROOT}/state/pubsub-channels.json`. This decouples publishers from subscribers -- a publisher doesn't need to know who is listening, and new subscribers can be added without changing any publisher code.
-
-The same parallel delivery mechanics apply: all subscriber forwards are emitted in a single response and execute concurrently.
-
 ## Plugin Structure
 
-```
-hierarchical-team-coordination/
-├── .claude-plugin/
-│   └── plugin.json              # Plugin manifest
-├── agents/
-│   ├── squad-leader.md          # Delegated coordinator
-│   ├── team-architect.md        # Pattern selection expert
-│   ├── skill-identifier.md      # Capability gap analyst
-│   └── announcer.md            # Stateless message relay
-├── commands/
-│   ├── squad.md                 # /squad slash command
-│   ├── announce.md              # /announce slash command
-│   └── publish.md               # /publish slash command
-├── hooks/
-│   ├── hooks.json               # Hook configuration
-│   └── scripts/
-│       └── cross-boundary-warning.sh  # Sub-team boundary warning
-├── skills/
-│   ├── team-coordination/
-│   │   ├── SKILL.md             # Skill definition and protocol reference
-│   │   └── references/
-│   │       └── protocols.md     # Detailed protocol specifications
-│   ├── team-patterns/           # Bundled: team organization patterns
-│   │   ├── SKILL.md
-│   │   ├── references/          # Pattern catalogs, topology diagrams, etc.
-│   │   ├── examples/            # Example team designs
-│   │   └── scripts/             # pattern-selector.py, scan-agents.sh, etc.
-│   └── skill-identification/    # Bundled: capability gap analysis framework
-│       ├── SKILL.md
-│       └── ...                  # Patterns, templates, analysis scripts
-├── scripts/
-│   └── roster.sh               # Squad roster management utility
-└── README.md                   # This file
-```
+<p align="center">
+  <img src="assets/plugin-inventory.svg" alt="Plugin directory inventory" width="760">
+</p>
 
 ## Constraints and Limitations
 
 1. **Spawn authority is centralized.** Only the team-lead can spawn agents. Every new agent requires a round-trip through the team-lead, which adds latency.
 
-2. **No hard sub-team boundaries.** Any agent can message any other agent by name. Sub-team isolation is enforced by convention (agent prompts), not by the system. The cross-boundary warning hook provides a soft enforcement layer.
+2. **No hard sub-team boundaries.** Any agent can message any other agent by name. Sub-team isolation is enforced by convention (agent prompts), not by the system.
 
-3. **No native multi-send.** The announcer mitigates this but still makes N individual `SendMessage` API calls under the hood.
+3. **Team-lead availability.** If the team-lead is deep in its own work, there is latency before it processes spawn requests. Messages queue until the team-lead's turn ends.
 
-4. **Team-lead availability.** If the team-lead is deep in its own work, there is latency before it processes spawn requests. Messages queue until the team-lead's turn ends.
-
-5. **Agent context is lost on dismissal.** If a worker is shut down, any uncommitted work or unshared findings are gone. Squad-leaders should ensure agents commit and document before requesting dismissals.
+4. **Agent context is lost on dismissal.** If a worker is shut down, any uncommitted work or unshared findings are gone. Squad-leaders should ensure agents commit and document before requesting dismissals.
 
 ## Design Decisions
 
 | Decision | Rationale |
 |----------|-----------|
-| Squad-leader has no domain expertise | Keeps prompts focused; domain decisions belong to workers or consultants |
+| Squad-leader's expertise is coordination, not the domain | Domain calls belong to the workers and consultants who are equipped to make them; the squad-leader focuses on facilitation, dispatch, unblocking, and team-lead communication — that is its expertise, and it is not nothing |
 | Short-circuit for simple patterns | Avoids spawning team-architect + skill-identifier for a 2-agent critic-reviser loop |
 | Structured spawn request format | Team-lead parses requests without back-and-forth clarification |
-| Announcer uses haiku with tool restriction | Relay function needs zero reasoning; haiku minimizes cost; `["SendMessage"]` prevents unintended actions |
-| Convention-based sub-team boundaries | No system-level enforcement exists; prompts + hook provide soft guardrails |
 | Context isolation is the primary benefit | Team-lead context window stays clean; squad-leader absorbs coordination chatter |
+| Opus by default for nearly every role | Multi-agent coordination is reasoning-intensive; this plugin does not optimize for cost. Override per-agent if you want to spend less. |

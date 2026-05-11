@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 1000" role="img" aria-labelledby="srTitle srDesc">
+  <title id="srTitle">SPAWN REQUEST form (sample)</title>
+  <desc id="srDesc">A sample SPAWN REQUEST sent by the squad-leader to the team-lead, rendered as a paper form. Header, fielded body, two requested agents, skills needed, task graph, and a stamped READY TO PROCEED.</desc>
+
+  <defs>
+    <filter id="paperShadow" x="-2%" y="-2%" width="104%" height="106%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="3" dy="5" result="o"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="ruledLines" x="0" y="0" width="40" height="22" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="22" x2="40" y2="22" stroke="#bda671" stroke-width="0.5" opacity="0.22"/>
+    </pattern>
+    <pattern id="paperGrain" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
+      <rect width="2" height="2" fill="#f5ecd0"/>
+      <rect x="0" y="0" width="1" height="1" fill="#efe3bd" opacity="0.35"/>
+    </pattern>
+  </defs>
+
+  <!-- Outer transparent frame so it floats on either GitHub theme -->
+  <rect width="760" height="1000" fill="none"/>
+
+  <!-- Paper sheet -->
+  <g filter="url(#paperShadow)">
+    <rect x="40" y="32" width="680" height="936" fill="url(#paperGrain)"/>
+    <rect x="40" y="32" width="680" height="936" fill="url(#ruledLines)"/>
+    <!-- left margin rule line, like notebook paper -->
+    <line x1="98" y1="32" x2="98" y2="968" stroke="#c14a4a" stroke-width="1" opacity="0.35"/>
+    <line x1="100" y1="32" x2="100" y2="968" stroke="#c14a4a" stroke-width="1" opacity="0.20"/>
+  </g>
+
+  <!-- Header banner -->
+  <rect x="40" y="32" width="680" height="78" fill="#1a1a2e"/>
+  <line x1="40" y1="110" x2="720" y2="110" stroke="#00ffff" stroke-width="2"/>
+  <line x1="40" y1="115" x2="720" y2="115" stroke="#00ffff" stroke-width="0.7" opacity="0.5"/>
+  <text x="64" y="60" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#00ffff" letter-spacing="3">FORM RCC-001 :: SQUAD-LEADER → TEAM-LEAD</text>
+  <text x="64" y="93" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="32" font-weight="700" fill="#f5ecd0" letter-spacing="6">SPAWN REQUEST</text>
+  <text x="696" y="60" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#aab" text-anchor="end" letter-spacing="1.5">protocol · v0.0.1</text>
+  <text x="696" y="93" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#00ffff" text-anchor="end" letter-spacing="2">[ FILED ]</text>
+
+  <!-- Header info fields -->
+  <g font-family="JetBrains Mono, Menlo, Courier, monospace" fill="#1f2937">
+    <g transform="translate(120, 144)">
+      <text font-size="9" fill="#7a6c44" letter-spacing="2">TASK</text>
+      <text x="0" y="22" font-size="14" font-weight="700" fill="#1f2937">Build REST API with auth and rate limiting</text>
+      <line x1="0" y1="34" x2="568" y2="34" stroke="#9b8e6c" stroke-width="0.6" opacity="0.7"/>
+    </g>
+
+    <g transform="translate(120, 196)">
+      <text font-size="9" fill="#7a6c44" letter-spacing="2">PATTERN</text>
+      <text x="0" y="22" font-size="13" fill="#1f2937">Supervisor-Worker with Reflection Loop</text>
+      <line x1="0" y1="34" x2="320" y2="34" stroke="#9b8e6c" stroke-width="0.6" opacity="0.7"/>
+    </g>
+    <g transform="translate(460, 196)">
+      <text font-size="9" fill="#7a6c44" letter-spacing="2">TOPOLOGY</text>
+      <text x="0" y="22" font-size="13" fill="#1f2937">hub-and-spoke</text>
+      <line x1="0" y1="34" x2="228" y2="34" stroke="#9b8e6c" stroke-width="0.6" opacity="0.7"/>
+    </g>
+
+    <g transform="translate(120, 248)">
+      <text font-size="9" fill="#7a6c44" letter-spacing="2">DESIGN PHASE</text>
+      <text x="0" y="22" font-size="13" fill="#1f2937">FULL — consulted team-architect and skill-identifier</text>
+      <line x1="0" y1="34" x2="568" y2="34" stroke="#9b8e6c" stroke-width="0.6" opacity="0.7"/>
+    </g>
+  </g>
+
+  <!-- Section divider: AGENTS REQUESTED -->
+  <g transform="translate(120, 308)">
+    <line x1="0" y1="0" x2="568" y2="0" stroke="#1a1a2e" stroke-width="1.5"/>
+    <rect x="0" y="-9" width="170" height="18" fill="#1a1a2e"/>
+    <text x="9" y="4" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#00ffff" letter-spacing="3">AGENTS REQUESTED</text>
+  </g>
+
+  <!-- Agent 1 -->
+  <g font-family="JetBrains Mono, Menlo, Courier, monospace" fill="#1f2937" transform="translate(120, 332)">
+    <text x="0" y="14" font-size="13" font-weight="700">1.</text>
+    <g transform="translate(28, 0)">
+      <text font-size="9" fill="#7a6c44" letter-spacing="2">NAME</text>
+      <text x="120" y="0" font-size="9" fill="#7a6c44" letter-spacing="2">TYPE</text>
+      <text x="320" y="0" font-size="9" fill="#7a6c44" letter-spacing="2">MODEL</text>
+
+      <text x="0" y="16" font-size="13" font-weight="700">api-implementer</text>
+      <text x="120" y="16" font-size="13">independent-contributor</text>
+      <text x="320" y="16" font-size="13">sonnet</text>
+
+      <text x="0" y="36" font-size="9" fill="#7a6c44" letter-spacing="2">ROLE</text>
+      <text x="0" y="52" font-size="12" fill="#1f2937">Implements API endpoints and middleware</text>
+    </g>
+    <line x1="0" y1="68" x2="568" y2="68" stroke="#9b8e6c" stroke-width="0.4" opacity="0.6" stroke-dasharray="3 3"/>
+  </g>
+
+  <!-- Agent 2 -->
+  <g font-family="JetBrains Mono, Menlo, Courier, monospace" fill="#1f2937" transform="translate(120, 412)">
+    <text x="0" y="14" font-size="13" font-weight="700">2.</text>
+    <g transform="translate(28, 0)">
+      <text font-size="9" fill="#7a6c44" letter-spacing="2">NAME</text>
+      <text x="120" y="0" font-size="9" fill="#7a6c44" letter-spacing="2">TYPE</text>
+      <text x="320" y="0" font-size="9" fill="#7a6c44" letter-spacing="2">MODEL</text>
+
+      <text x="0" y="16" font-size="13" font-weight="700">api-reviewer</text>
+      <text x="120" y="16" font-size="13">critical-code-reviewer</text>
+      <text x="320" y="16" font-size="13">opus</text>
+
+      <text x="0" y="36" font-size="9" fill="#7a6c44" letter-spacing="2">ROLE</text>
+      <text x="0" y="52" font-size="12" fill="#1f2937">Reviews all code before integration</text>
+    </g>
+  </g>
+
+  <!-- Section divider: SKILLS NEEDED -->
+  <g transform="translate(120, 514)">
+    <line x1="0" y1="0" x2="568" y2="0" stroke="#1a1a2e" stroke-width="1.5"/>
+    <rect x="0" y="-9" width="140" height="18" fill="#1a1a2e"/>
+    <text x="9" y="4" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#00ffff" letter-spacing="3">SKILLS NEEDED</text>
+  </g>
+
+  <!-- Skills entries -->
+  <g font-family="JetBrains Mono, Menlo, Courier, monospace" fill="#1f2937" transform="translate(120, 538)">
+    <g transform="translate(0, 0)">
+      <rect x="0" y="-2" width="74" height="18" fill="#0a3a3a"/>
+      <text x="9" y="11" font-size="10" fill="#00ffff" font-weight="700" letter-spacing="1.5">EXISTING</text>
+      <text x="92" y="13" font-size="13"><tspan font-weight="700">team-patterns</tspan> <tspan fill="#7a6c44">→</tspan> squad-leader</text>
+    </g>
+    <g transform="translate(0, 28)">
+      <rect x="0" y="-2" width="74" height="18" fill="#5a1a1a"/>
+      <text x="9" y="11" font-size="10" fill="#ffb6b6" font-weight="700" letter-spacing="1.5">MISSING</text>
+      <text x="92" y="13" font-size="13"><tspan font-weight="700">rate-limiting-patterns</tspan> <tspan fill="#7a6c44">→</tspan> create with skill-creator-enhanced</text>
+    </g>
+  </g>
+
+  <!-- Section divider: TASK GRAPH -->
+  <g transform="translate(120, 608)">
+    <line x1="0" y1="0" x2="568" y2="0" stroke="#1a1a2e" stroke-width="1.5"/>
+    <rect x="0" y="-9" width="120" height="18" fill="#1a1a2e"/>
+    <text x="9" y="4" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#00ffff" letter-spacing="3">TASK GRAPH</text>
+  </g>
+
+  <!-- Task graph as a small dependency diagram -->
+  <g font-family="JetBrains Mono, Menlo, Courier, monospace" transform="translate(120, 636)">
+    <!-- T1 -->
+    <rect x="0" y="0" width="240" height="46" fill="#fdf6df" stroke="#1f2937" stroke-width="1"/>
+    <text x="10" y="16" font-size="10" fill="#7a6c44" letter-spacing="1.5">TASK 1 · api-implementer</text>
+    <text x="10" y="34" font-size="13" fill="#1f2937" font-weight="700">Implement auth middleware</text>
+
+    <!-- T2 (blocked by T1) -->
+    <rect x="0" y="62" width="240" height="46" fill="#fdf6df" stroke="#1f2937" stroke-width="1"/>
+    <text x="10" y="78" font-size="10" fill="#7a6c44" letter-spacing="1.5">TASK 2 · api-implementer · blocks: T1</text>
+    <text x="10" y="96" font-size="13" fill="#1f2937" font-weight="700">Implement rate limiter</text>
+
+    <!-- T3 (blocked by T1, parallel with T2) -->
+    <rect x="328" y="0" width="240" height="46" fill="#fdf6df" stroke="#1f2937" stroke-width="1"/>
+    <text x="338" y="16" font-size="10" fill="#7a6c44" letter-spacing="1.5">TASK 3 · api-reviewer · blocks: T1</text>
+    <text x="338" y="34" font-size="13" fill="#1f2937" font-weight="700">Review auth code</text>
+
+    <!-- T4 (blocked by T2, T3) -->
+    <rect x="328" y="62" width="240" height="46" fill="#fdf6df" stroke="#1f2937" stroke-width="1"/>
+    <text x="338" y="78" font-size="10" fill="#7a6c44" letter-spacing="1.5">TASK 4 · api-implementer · blocks: T2,T3</text>
+    <text x="338" y="96" font-size="13" fill="#1f2937" font-weight="700">Write integration tests</text>
+
+    <!-- Dependency arrows -->
+    <!-- T1 -> T2 -->
+    <line x1="120" y1="46" x2="120" y2="62" stroke="#1f2937" stroke-width="1.2" stroke-dasharray="2 2"/>
+    <polygon points="120,62 116,56 124,56" fill="#1f2937"/>
+    <!-- T1 -> T3 -->
+    <line x1="240" y1="20" x2="328" y2="20" stroke="#1f2937" stroke-width="1.2" stroke-dasharray="2 2"/>
+    <polygon points="328,20 322,16 322,24" fill="#1f2937"/>
+    <!-- T2 -> T4 -->
+    <line x1="240" y1="86" x2="328" y2="86" stroke="#1f2937" stroke-width="1.2" stroke-dasharray="2 2"/>
+    <polygon points="328,86 322,82 322,90" fill="#1f2937"/>
+    <!-- T3 -> T4 -->
+    <line x1="448" y1="46" x2="448" y2="62" stroke="#1f2937" stroke-width="1.2" stroke-dasharray="2 2"/>
+    <polygon points="448,62 444,56 452,56" fill="#1f2937"/>
+  </g>
+
+  <!-- READY TO PROCEED + APPROVED stamp -->
+  <g transform="translate(120, 800)">
+    <text font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#7a6c44" letter-spacing="2">READY TO PROCEED</text>
+    <line x1="0" y1="14" x2="568" y2="14" stroke="#1a1a2e" stroke-width="1.5"/>
+    <text x="0" y="48" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="36" font-weight="700" fill="#1f2937" letter-spacing="6">YES</text>
+
+    <!-- Approved stamp -->
+    <g transform="translate(380, 26) rotate(-8)">
+      <rect x="0" y="0" width="180" height="64" fill="none" stroke="#0a7e8c" stroke-width="3" rx="3"/>
+      <rect x="6" y="6" width="168" height="52" fill="none" stroke="#0a7e8c" stroke-width="1" rx="2" opacity="0.7"/>
+      <text x="90" y="28" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" font-weight="700" fill="#0a7e8c" text-anchor="middle" letter-spacing="2">APPROVED</text>
+      <text x="90" y="46" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#0a7e8c" text-anchor="middle" letter-spacing="2">SQUAD-LEADER · 04:21Z</text>
+    </g>
+  </g>
+
+  <!-- Footer / signature line -->
+  <g transform="translate(120, 920)">
+    <line x1="0" y1="0" x2="220" y2="0" stroke="#1f2937" stroke-width="0.6"/>
+    <text x="0" y="14" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" letter-spacing="2">SUBMITTED BY · squad-leader</text>
+    <line x1="348" y1="0" x2="568" y2="0" stroke="#1f2937" stroke-width="0.6"/>
+    <text x="568" y="14" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" letter-spacing="2" text-anchor="end">RECEIVED BY · team-lead</text>
+  </g>
+</svg>

@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c 'import json,os,sys; p=os.path.join(os.environ[\"CLAUDE_PLUGIN_ROOT\"],\"files\",\"session-start-context.txt\"); print(json.dumps({\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":open(p).read()}}))'"
+            "command": "python3 -c 'import json,os; print(json.dumps({\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":open(os.environ[\"CLAUDE_PLUGIN_ROOT\"]+\"/hooks/session-start-context.txt\").read()}}))'"
           }
         ]
       }

@@ -1,17 +1,20 @@
 ---
 name: squad
-description: Spawn a hierarchical squad to design and coordinate a sub-team
-argument-hint: [task-description]
+description: Spawn a self-coordinating squad to design and coordinate a sub-team
+argument-hint: [--sonnet] [task-description]
 ---
 
 <!--
-Usage: /squad [task description]
+Usage: /squad [--sonnet] [task description]
 Example: /squad Implement the authentication overhaul with OAuth2 and MFA support
+Example: /squad --sonnet Refactor the legacy notification module
 Requires: The trio agents (squad-leader, team-architect, skill-identifier) bundled
-          in this plugin's agents/ directory.
+          in this plugin's agents/ directory. The contingent agent-explorer
+          (also bundled) is spawned only on demand via a follow-up SPAWN REQUEST
+          when the squad-leader determines a gap genuinely requires catalog search.
 -->
 
-# /squad: Spawn a Hierarchical Squad
+# /squad: Spawn a Self-Coordinating Squad
 
 ## Overview
 
@@ -19,9 +22,18 @@ This command triggers the **trio pattern** from ADR-001 (Hierarchical Team Coord
 
 ## Task
 
-The task to assign to the squad: `$ARGUMENTS`
+Parse `$ARGUMENTS` for an optional `--sonnet` flag at the start. If present, strip it from the task string and set `SONNET_DEFAULT = true`; otherwise `SONNET_DEFAULT = false`.
 
-If no task argument is provided, ask the user what task the squad should handle before proceeding.
+The remaining task to assign to the squad: `$ARGUMENTS` (with `--sonnet` removed if present).
+
+If no task argument remains, ask the user what task the squad should handle before proceeding.
+
+## Model Selection
+
+This plugin biases toward Opus for reasoning-critical roles, but respects the user's default-model setting elsewhere. Two modes:
+
+- **Default mode** (no `--sonnet` flag): the team-architect is spawned with `opus` explicitly because pattern selection is deeply reasoning-dependent and Sonnet's output here is materially worse. The other trio agents are spawned with `default` (whatever model the user has configured) since their work is more structured. Workers requested via SPAWN REQUEST follow the squad-leader's per-role recommendation.
+- **`--sonnet` mode**: the user has explicitly opted to run the entire squad on Sonnet. Spawn all trio agents with `sonnet`, and pass an instruction to the squad-leader that workers should default to `sonnet` in spawn requests unless a role genuinely cannot function with it. We do not encourage this for team-architect specifically, but if the user has asked for it, honor the request.
 
 ## Execution Steps
 
@@ -31,19 +43,19 @@ Spawn all three agents simultaneously using the Task tool with `team_name` set t
 
 1. **squad-leader**
    - Agent: `squad-leader` (from `${CLAUDE_PLUGIN_ROOT}/agents/squad-leader.md`)
-   - Model: opus
+   - Model: `sonnet` if `SONNET_DEFAULT`, else `default`
    - Role: Delegated coordinator -- will design the sub-team and manage workers
    - This agent receives the task assignment
 
 2. **team-architect**
    - Agent: `team-architect` (from `${CLAUDE_PLUGIN_ROOT}/agents/team-architect.md`)
-   - Model: opus
+   - Model: `sonnet` if `SONNET_DEFAULT`, else `opus` (explicit -- pattern selection benefits materially from deeper reasoning)
    - Role: Pattern selection expert -- analyzes the task and recommends team structure
 
 3. **skill-identifier**
    - Agent: `skill-identifier` (from `${CLAUDE_PLUGIN_ROOT}/agents/skill-identifier.md`)
-   - Model: sonnet
-   - Role: Capability gap analyst -- maps required skills to available skills and identifies gaps
+   - Model: `sonnet` if `SONNET_DEFAULT`, else `default`
+   - Role: Skill identification specialist -- identifies required skills, maps them to available skills, and flags gaps when present
 
 All three agents MUST be spawned in the same message (parallel tool calls) to minimize latency.
 
@@ -64,6 +76,13 @@ When you have synthesized their input, send me a SPAWN REQUEST using the
 protocol from ADR-001 and I will spawn the workers you need.
 ```
 
+If `SONNET_DEFAULT` is true, append this line to the message above before sending:
+
+```
+MODEL POLICY: The user invoked /squad with --sonnet. Default workers in your
+SPAWN REQUEST to `sonnet` unless a role genuinely cannot function with it.
+```
+
 ### Step 3: Wait for the Spawn Request
 
 The squad-leader will:
@@ -72,6 +91,10 @@ The squad-leader will:
 3. Synthesize both inputs into a structured SPAWN REQUEST
 
 When you receive the SPAWN REQUEST from the squad-leader, parse it and spawn the requested worker agents — **subject to the SendMessage requirement below**. Then confirm back to the squad-leader that the agents are available, noting any `subagent_type` substitutions you made.
+
+**Expect multiple SPAWN REQUESTs across the squad's lifetime.** The squad-leader is instructed to send per-phase spawn requests by default rather than batching every worker into one up-front request. This is an anti-wedging measure — long-idle workers parked since the start of the run are the ones most likely to be stuck in their tmux panes when finally messaged, so the squad-leader spawns them just-in-time. Each incoming SPAWN REQUEST is validated against all four Hard Rules independently. Treat them as a normal stream of small requests, not as exceptions.
+
+**Contingent agent-explorer.** A follow-up SPAWN REQUEST may also include the `agent-explorer` agent — this is the contingent fourth member of the design phase, requested by the squad-leader only when the trio has identified a gap that genuinely cannot be filled by composition (existing agent + skill, modified agent prompt, paired existing skills). Treat it like any other SPAWN REQUEST line; the agent-explorer is bundled in this plugin's `agents/` directory.
 
 ### Hard Rules (validate before honoring any SPAWN REQUEST)
 
@@ -108,6 +131,12 @@ Workers running in parallel must know exactly what they own and what they don't.
 - **Worktree isolation** when commits are involved. Parallel workers in the same git worktree can sweep each other's unstaged WIP into their own commits via misdirected `git add`. Either spawn each worker in its own `git worktree add`, or mandate strict atomic `git add <specific-path>` + immediate commit, with `git stash` for unrelated WIP.
 
 If the spawn request is silent on file scope, push back. Patching this in mid-run is harder than enforcing it up front.
+
+#### Rule 4 — Working-Directory Permissions
+
+If you (the team-lead) decide to organize the squad-leader and its workers in a non-default working directory -- e.g., a `/tmp` scratch path, a sibling worktree, a project-relative `runs/` directory -- you must verify before spawning that **every agent in the squad has the necessary permissions to read, write, and (where applicable) execute scripts in that directory**. We have observed real failures where a squad was launched in `/tmp` and individual agents got confused mid-run because their tool-permission policies didn't extend there: file reads silently failed, writes hit `EACCES`, and the squad-leader saw "completed" reports for tasks that had actually no-oped.
+
+The fix is upstream: before sending the assignment message in Step 2, check that the chosen working directory is reachable by all spawned agent types under their permission policies. If you're unsure, default to the project root or `~/.claude/<work-type>-runs/` (which Rule 2 already prefers for output persistence) -- both of those are well-trodden paths that every agent type can access. Don't try to debug permission failures inside a running squad; spawn it somewhere everyone can already reach.
 
 ### Step 4: Let the Squad Leader Coordinate
 
@@ -154,7 +183,7 @@ Task 2: [description] -> Owner: [agent-name] (blocked by: 1)
 READY TO PROCEED: [YES | NO -- reason]
 ```
 
-> **Team-lead validation step:** before honoring `READY TO PROCEED: YES`, run all three Hard Rules above — every agent has `SendMessage`, the output root is persistent (not `/tmp`), and every worker has explicit file scope plus permission to do destructive actions in that scope. Substitute, push back for clarification, or reject as needed.
+> **Team-lead validation step:** before honoring `READY TO PROCEED: YES`, run all four Hard Rules above — every agent has `SendMessage`, the output root is persistent (not `/tmp`), every worker has explicit file scope plus permission to do destructive actions in that scope, and every spawned agent has the working-directory permissions it needs. Substitute, push back for clarification, or reject as needed.
 
 ## Completion Report Protocol (Reference)
 
@@ -181,25 +210,6 @@ Issues:
 Recommendations:
 - [follow-up work, or "None"]
 ```
-
-## Announcer (Optional)
-
-If the squad-leader needs to send messages to multiple workers at once, you may also spawn an `announcer` agent:
-
-- Agent: `announcer` (from `${CLAUDE_PLUGIN_ROOT}/agents/announcer.md`)
-- Model: haiku
-- Tools: `["SendMessage"]` only
-- Role: Stateless multi-send relay
-
-The squad-leader (or any agent) can use the announcer by sending messages in the format:
-```
-[TO: agent-1, agent-2, agent-3]
-[FROM: sender-name]
----
-Message body here.
-```
-
-Only spawn the announcer if the squad-leader requests it or if the team has 4+ workers who need group notifications.
 
 ## Notes
 

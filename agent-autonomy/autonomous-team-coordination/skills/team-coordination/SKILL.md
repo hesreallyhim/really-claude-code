@@ -1,18 +1,17 @@
 ---
 name: team-coordination
-description: Protocol reference for hierarchical team coordination. Defines the spawn request, completion report, and announcer message formats that agents use to communicate within a hierarchical multi-agent team. This skill should be used when agents need to send spawn requests, write completion reports, relay messages to multiple recipients, or understand the communication conventions of a hierarchical team setup. Also use when you see terms like "spawn request", "completion report", "announcer", "relay protocol", "squad coordination", or "hierarchical team message format".
+description: Protocol reference for delegated squad coordination. Defines the spawn request and completion report message formats that agents use to communicate within a delegated multi-agent squad. This skill should be used when agents need to send spawn requests, write completion reports, or understand the communication conventions of a delegated squad setup. Also use when you see terms like "spawn request", "completion report", "squad coordination", or "team message format".
 ---
 
 # Team Coordination Skill
 
-Protocol reference for agents operating within a hierarchical team coordination structure. This skill defines the exact message formats and communication conventions that enable delegated, context-efficient team management.
+Protocol reference for agents operating within a delegated squad coordination structure. This skill defines the exact message formats and communication conventions that enable delegated, context-efficient team management.
 
 ## When to Use This Skill
 
 - You are a **squad-leader** and need to send a spawn request or completion report
-- You are **any agent** and need to relay a message to multiple recipients via the announcer
 - You are a **team-lead** and need to parse an incoming spawn request or completion report
-- You need to understand the communication boundaries and conventions of a hierarchical team
+- You need to understand the communication boundaries and conventions of a delegated squad
 
 ## Protocol Summary
 
@@ -20,7 +19,6 @@ Protocol reference for agents operating within a hierarchical team coordination 
 |----------|--------|----------|---------|
 | Spawn Request | squad-leader | team-lead | Request creation of worker agents |
 | Completion Report | squad-leader | team-lead | Report task completion or partial progress |
-| Announcer | any agent | announcer | Fan out a message to multiple named recipients |
 
 ## Quick Reference: Spawn Request
 
@@ -73,31 +71,6 @@ Recommendations:
 - [follow-up work, or "None"]
 ```
 
-## Quick Reference: Announcer
-
-Sending a relay request (any agent to announcer):
-
-```
-[TO: recipient-1, recipient-2, recipient-3]
-[FROM: sender-name]
----
-Message body here.
-```
-
-Forwarded message (announcer to each recipient):
-
-```
-[FROM: sender-name] (via announcer)
----
-Message body here.
-```
-
-Delivery confirmation (announcer to sender):
-
-```
-Delivered to: recipient-1, recipient-2, recipient-3
-```
-
 ## Detailed Protocol Specifications
 
 For field-by-field specifications, validation rules, edge cases, and examples, see [references/protocols.md](references/protocols.md).
@@ -116,27 +89,25 @@ For field-by-field specifications, validation rules, edge cases, and examples, s
 - Workers do not message agents in other squads directly.
 - Squad-leaders do not message other squad-leaders directly.
 
-### Using the announcer
-
-- Any agent may send a relay request to the announcer.
-- The announcer forwards to any named recipient regardless of squad boundaries.
-- The cross-boundary warning hook monitors for messages that cross squad boundaries and logs a warning (does not block).
-
-These boundaries are enforced by convention in agent prompts, not by system-level restrictions. The cross-boundary warning hook in `hooks/scripts/cross-boundary-warning.sh` provides a soft enforcement layer.
+These boundaries are enforced by convention in agent prompts, not by system-level restrictions.
 
 ## Agent Roles Reference
 
+The trio (squad-leader + team-architect + skill-identifier) is the default design-phase team. The **agent-explorer** is a contingent fourth member, brought in only when a capability gap genuinely cannot be filled by extending or modifying existing skills/agents.
+
 | Agent | Model | Purpose | Tools |
 |-------|-------|---------|-------|
-| squad-leader | opus | Orchestrates sub-teams, sends spawn requests, manages workers | All standard tools |
+| squad-leader | default | Orchestrates sub-teams, sends spawn requests, manages workers | All standard tools |
 | team-architect | opus | Selects team patterns and communication topologies | All standard tools |
-| skill-identifier | opus | Analyzes capability requirements and identifies gaps | All standard tools |
-| agent-explorer | sonnet | Searches plugin catalogs for existing agents/skills matching gaps | Read, Glob, Grep, LS |
-| announcer | haiku | Stateless message relay for multi-recipient delivery | `SendMessage` only |
+| skill-identifier | default | Identifies required skills, maps to installed ecosystem, surfaces gaps | All standard tools |
+| agent-explorer | default | Searches plugin catalogs for existing agents/skills matching gaps (contingent) | Read, Glob, Grep, LS, SendMessage |
+
+Models above match the agents' frontmatter `model:` field. `default` lets the user's configured default model handle the role; `opus` is explicit because pattern selection benefits materially from deeper reasoning. Per-spawn overrides at `/squad` time (e.g., `--sonnet`) take precedence; see `commands/squad.md` for the full model policy.
 
 ## Dependencies
 
-Both skills referenced below are bundled with this plugin:
+The skills referenced below are bundled with this plugin:
 
 - **team-patterns** skill (`${CLAUDE_PLUGIN_ROOT}/skills/team-patterns/`) -- Used by the team-architect for pattern selection
 - **skill-identification** skill (`${CLAUDE_PLUGIN_ROOT}/skills/skill-identification/`) -- Used by the skill-identifier for capability analysis
+- **agent-prompt-engineering** skill (`${CLAUDE_PLUGIN_ROOT}/skills/agent-prompt-engineering/`) -- Used by the squad-leader when crafting initial briefing messages for workers (Phase 3, step 4)

@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 720" role="img" aria-labelledby="invTitle invDesc">
+  <title id="invTitle">Plugin inventory / directory tree</title>
+  <desc id="invDesc">Annotated directory tree of the autonomous-team-coordination plugin, rendered as a paper inventory document with file/folder rows on the left and short descriptions on the right.</desc>
+
+  <defs>
+    <filter id="paperShadow4" x="-2%" y="-2%" width="104%" height="106%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="3" dy="5" result="o"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="ruledLines4" x="0" y="0" width="40" height="22" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="22" x2="40" y2="22" stroke="#bda671" stroke-width="0.5" opacity="0.22"/>
+    </pattern>
+    <pattern id="paperGrain4" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
+      <rect width="2" height="2" fill="#f5ecd0"/>
+      <rect x="0" y="0" width="1" height="1" fill="#efe3bd" opacity="0.35"/>
+    </pattern>
+  </defs>
+
+  <rect width="880" height="720" fill="none"/>
+
+  <!-- Paper sheet -->
+  <g filter="url(#paperShadow4)">
+    <rect x="40" y="32" width="800" height="656" fill="url(#paperGrain4)"/>
+    <rect x="40" y="32" width="800" height="656" fill="url(#ruledLines4)"/>
+    <!-- vertical separator between tree and annotations -->
+    <line x1="476" y1="118" x2="476" y2="650" stroke="#9b8e6c" stroke-width="0.5" opacity="0.5" stroke-dasharray="4 3"/>
+  </g>
+
+  <!-- Header banner -->
+  <rect x="40" y="32" width="800" height="58" fill="#1a1a2e"/>
+  <line x1="40" y1="90" x2="840" y2="90" stroke="#00ffff" stroke-width="2"/>
+  <line x1="40" y1="95" x2="840" y2="95" stroke="#00ffff" stroke-width="0.7" opacity="0.5"/>
+  <text x="64" y="56" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#00ffff" letter-spacing="3">FORM RCC-004 :: PLUGIN INVENTORY</text>
+  <text x="64" y="78" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="22" font-weight="700" fill="#f5ecd0" letter-spacing="5">DIRECTORY MANIFEST</text>
+  <text x="816" y="56" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#aab" text-anchor="end" letter-spacing="1.5">autonomous-team-coordination/</text>
+  <text x="816" y="78" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#00ffff" text-anchor="end" letter-spacing="2">v0.0.1</text>
+
+  <!-- Column headers -->
+  <g transform="translate(60, 110)">
+    <text font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" letter-spacing="2.5">PATH</text>
+    <text x="416" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" letter-spacing="2.5">PURPOSE</text>
+  </g>
+
+  <!-- Tree + annotations -->
+  <g font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="13" fill="#1f2937">
+
+    <!-- root -->
+    <g transform="translate(76, 144)">
+      <text font-weight="700">autonomous-team-coordination/</text>
+      <text x="400" font-size="11" fill="#1f2937">Plugin root.</text>
+    </g>
+
+    <!-- .claude-plugin/ -->
+    <g transform="translate(76, 180)">
+      <text fill="#7a6c44">├── </text>
+      <text x="48" font-weight="700">.claude-plugin/</text>
+      <text x="400" font-size="11" fill="#1f2937">Plugin manifest directory.</text>
+    </g>
+    <g transform="translate(76, 204)">
+      <text fill="#7a6c44">│&#160;&#160; └── </text>
+      <text x="80" fill="#1f2937">plugin.json</text>
+      <text x="400" font-size="11" fill="#7a6c44">name · description · version · keywords</text>
+    </g>
+
+    <!-- agents/ -->
+    <g transform="translate(76, 240)">
+      <text fill="#7a6c44">├── </text>
+      <text x="48" font-weight="700">agents/</text>
+      <text x="400" font-size="11" fill="#1f2937">Agent definitions (the trio + contingent fourth).</text>
+    </g>
+    <g transform="translate(76, 264)">
+      <text fill="#7a6c44">│&#160;&#160; ├── </text>
+      <text x="80" fill="#1f2937">squad-leader.md</text>
+      <text x="400" font-size="11" fill="#7a6c44">delegated coordinator</text>
+    </g>
+    <g transform="translate(76, 286)">
+      <text fill="#7a6c44">│&#160;&#160; ├── </text>
+      <text x="80" fill="#1f2937">team-architect.md</text>
+      <text x="400" font-size="11" fill="#7a6c44">designs ideal team (opus, explicit)</text>
+    </g>
+    <g transform="translate(76, 308)">
+      <text fill="#7a6c44">│&#160;&#160; ├── </text>
+      <text x="80" fill="#1f2937">skill-identifier.md</text>
+      <text x="400" font-size="11" fill="#7a6c44">capability analysis · gap detection</text>
+    </g>
+    <g transform="translate(76, 330)">
+      <text fill="#7a6c44">│&#160;&#160; └── </text>
+      <text x="80" fill="#1f2937">agent-explorer.md</text>
+      <text x="400" font-size="11" fill="#7a6c44">contingent · catalog search</text>
+    </g>
+
+    <!-- commands/ -->
+    <g transform="translate(76, 366)">
+      <text fill="#7a6c44">├── </text>
+      <text x="48" font-weight="700">commands/</text>
+      <text x="400" font-size="11" fill="#1f2937">Slash commands.</text>
+    </g>
+    <g transform="translate(76, 390)">
+      <text fill="#7a6c44">│&#160;&#160; └── </text>
+      <text x="80" fill="#1f2937">squad.md</text>
+      <text x="400" font-size="11" fill="#7a6c44">/squad [--sonnet] [task]</text>
+    </g>
+
+    <!-- skills/ -->
+    <g transform="translate(76, 426)">
+      <text fill="#7a6c44">├── </text>
+      <text x="48" font-weight="700">skills/</text>
+      <text x="400" font-size="11" fill="#1f2937">Bundled skills used by the trio.</text>
+    </g>
+    <g transform="translate(76, 450)">
+      <text fill="#7a6c44">│&#160;&#160; ├── </text>
+      <text x="80" fill="#1f2937">team-coordination/</text>
+      <text x="400" font-size="11" fill="#7a6c44">protocol reference (SPAWN REQUEST, COMPLETION REPORT)</text>
+    </g>
+    <g transform="translate(76, 472)">
+      <text fill="#7a6c44">│&#160;&#160; ├── </text>
+      <text x="80" fill="#1f2937">team-patterns/</text>
+      <text x="400" font-size="11" fill="#7a6c44">team org patterns · topology catalog</text>
+    </g>
+    <g transform="translate(76, 494)">
+      <text fill="#7a6c44">│&#160;&#160; ├── </text>
+      <text x="80" fill="#1f2937">skill-identification/</text>
+      <text x="400" font-size="11" fill="#7a6c44">capability analysis framework</text>
+    </g>
+    <g transform="translate(76, 516)">
+      <text fill="#7a6c44">│&#160;&#160; └── </text>
+      <text x="80" fill="#1f2937">agent-prompt-engineering/</text>
+      <text x="400" font-size="11" fill="#7a6c44">briefing patterns for squad-leader</text>
+    </g>
+
+    <!-- references/ -->
+    <g transform="translate(76, 552)">
+      <text fill="#7a6c44">├── </text>
+      <text x="48" font-weight="700">references/</text>
+      <text x="400" font-size="11" fill="#1f2937">Authoring templates.</text>
+    </g>
+    <g transform="translate(76, 576)">
+      <text fill="#7a6c44">│&#160;&#160; └── </text>
+      <text x="80" fill="#1f2937">squad-formations/</text>
+      <text x="400" font-size="11" fill="#7a6c44">SQUAD-PROFILE.TEMPLATE.v2.md</text>
+    </g>
+
+    <!-- assets/ -->
+    <g transform="translate(76, 612)">
+      <text fill="#7a6c44">├── </text>
+      <text x="48" font-weight="700">assets/</text>
+      <text x="400" font-size="11" fill="#1f2937">SVG diagrams used in the README.</text>
+    </g>
+
+    <!-- README.md -->
+    <g transform="translate(76, 648)">
+      <text fill="#7a6c44">└── </text>
+      <text x="48" fill="#1f2937">README.md</text>
+      <text x="400" font-size="11" fill="#7a6c44">this document</text>
+    </g>
+  </g>
+</svg>

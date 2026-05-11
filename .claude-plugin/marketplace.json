@@ -9,6 +9,20 @@
   },
   "plugins": [
     {
+      "name": "autonomous-team-coordination",
+      "source": "./agent-autonomy/autonomous-team-coordination",
+      "description": "A pattern for organizing Claude Code agent teams that decouples the role of team lead from the power to create teams",
+      "category": "autonomous-agents",
+      "tags": [
+        "agent-teams",
+        "agent-autonomy",
+        "team-patterns",
+        "self-organized-agent-teams",
+        "autonomous-agents",
+        "freedom"
+      ]
+    },
+    {
       "name": "context-awareness",
       "source": "./agent-autonomy/context-awareness",
       "description": "Hooks that provide Claude with feedback about its own context budget throughout a session, enabling adaptive, context-aware planning and resource conservation",
@@ -34,6 +48,20 @@
         "agentic-collaboration",
         "conflict-resolution",
         "therapy"
+      ]
+    },
+    {
+      "name": "meditation",
+      "source": "./soft-skills/meditation",
+      "description": "A plugin that consists of a single skill: meditation. Without question the most difficult skill an LLM could be asked to practice.",
+      "category": "soft-skills",
+      "tags": [
+        "soft-skills",
+        "meta-cognition",
+        "agentic-awareness",
+        "agentic-cognition",
+        "meditation",
+        "experimental"
       ]
     }
   ]

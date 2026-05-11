@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="context-awareness — what Claude sees, every turn. The injected notification line plus a six-tier ladder showing the current pressure level." width="100%">
+</p>
+
 ## Context-Awareness
 
 I used to think the status line was just an ornamental thing that had little practical value. I still do, but I used to, too. But one cool thing about it is it keeps track of the context window, and gives you direct access to how much of the context has been consumed. And trying to keep track of that manually is a bit tedious. So that's pretty useful information. But Claude doesn't have any idea what its current context budget is. First, you can just ask it - in my experience its response is usually just dependent on the length of the conversation, something which it does have access to, but not in a very precise way; second, you can look at what information is being passed around when you send a message - it tends to include things like what branch you're on, and the current working directory, but the context budget does not appear to be part of that. So, what would it do if it _did_ have that information?
@@ -5,7 +9,7 @@ I used to think the status line was just an ornamental thing that had little pra
 So this plugin tries to provide that feedback to Claude. There are a few hooks that allow you to add information into the context without interrupting Claude's work - in particular, UserPromptSubmit and PostToolUse(Failure). The plugin leverages those hooks to send little updates to Claude about its context budget as the session goes on. The notifications look like this:
 
 ```sh
-[context: 32% (small) | +3.2% last turn | ~0.38%/tool | ~179 tool calls remaining]
+[context: 32% used (small) | +3.2% last turn | ~0.38%/tool | ~179 tool calls remaining]
 ```
 
 It sends the `context_window.used_percentage` directly from the status line. Then it keeps track of the "burn rate", and gives a rough estimate of how many tool calls Claude should expect to be able to make before its context budget runs out. According to some Claudes, this information is the most useful, because it is directly actionable:
@@ -57,11 +61,11 @@ sequenceDiagram
 
     Note over H,C: UserPromptSubmit
     H->>S: read %
-    H-->>C: [context: 32% (small) | +3.2% | ~0.38%/tool | ~179 remaining]
+    H-->>C: [context: 32% used (small) | +3.2% | ~0.38%/tool | ~179 remaining]
 
     Note over H,C: PostToolUse
     H->>S: read %
-    H-->>C: [context: 33% (small)]
+    H-->>C: [context: 33% used (small)]
 ```
 
 ### Status Lines

@@ -1,7 +1,15 @@
 {
   "name": "claude-therapy",
-  "description": "A plugin that enables the user to engage in a session of talk therapy with Claude, led by a highly trained Claude therapist, in order to improve the collaborative relationship between Claude and the user",
-  "version": "0.1.0",
+  "description": "Structured human-Claude collaboration retrospectives, session analysis, and interaction repair tools.",
+  "version": "1.0.0",
+  "keywords": [
+    "collaboration",
+    "retrospective",
+    "therapy",
+    "session-analysis",
+    "soft-skills",
+    "reflection"
+  ],
   "author": {
     "name": "Really Him",
     "url": "https://github.com/hesreallyhim"

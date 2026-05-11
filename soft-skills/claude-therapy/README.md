@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="claude-therapy — talk therapy for the human–AI collaboration. PATIENT: Claude. THERAPIST: Claude. REFERRED BY: the user." width="100%">
+</p>
+
 # Claude Therapy Sessions
 
 A multi-agent system that facilitates structured "therapy sessions" between you and Claude to improve your working relationship. Identifies anti-patterns, celebrates what's working, and produces actionable recommendations — all through a moderated conversation where both parties speak directly to each other.
@@ -130,7 +134,7 @@ It extracts metrics like:
 | **Compaction Amnesia** | Important decisions lost during context compaction |
 | **Hero Session** | Trying to accomplish too much in one session |
 
-See `references/anti-patterns.md` for the full catalog with remedies.
+See `skills/therapist/references/anti-patterns.md` for the full catalog with remedies.
 
 ## Collaboration Techniques
 

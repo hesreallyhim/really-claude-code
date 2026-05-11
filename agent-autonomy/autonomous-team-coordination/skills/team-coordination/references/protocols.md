@@ -1,6 +1,6 @@
-# Protocol Reference: Hierarchical Team Coordination
+# Protocol Reference: Delegated Squad Coordination
 
-Detailed specifications for the three communication protocols used in hierarchical team coordination.
+Detailed specifications for the two communication protocols used in delegated squad coordination.
 
 ---
 
@@ -54,7 +54,7 @@ READY TO PROCEED: [YES | NO -- reason]
 |-------|----------|--------|-------------|
 | Task | Yes | Free text, one sentence | Brief description of the overall task |
 | Pattern | Yes | Pattern name from team-patterns skill | The team pattern selected for this task (e.g., "Supervisor-Worker with Reflection Loop", "Pipeline", "Fan-Out/Fan-In") |
-| Topology | Yes | `hub-and-spoke`, `pipeline`, `mesh`, `tree`, `star`, `adversarial` | Communication topology for the sub-team |
+| Topology | Yes | `hub-and-spoke`, `pipeline`, `mesh`, `tree`, `star`, `adversarial`, `point-to-point` | Communication topology for the sub-team |
 | Design phase | Yes | `FULL` or `SHORT-CIRCUITED -- [reason]` | Whether the squad-leader consulted the team-architect and skill-identifier, or skipped the design phase |
 
 #### AGENTS REQUESTED Section
@@ -74,9 +74,12 @@ Each agent entry has four fields:
 - Names should be descriptive of the agent's role in this specific task.
 
 **Model selection guidance:**
-- `opus` -- Complex reasoning, coordination, architecture decisions.
-- `sonnet` -- Standard implementation, code writing, analysis.
+- `default` -- Routine worker tasks; respects the user's configured default model. The default for most workers.
+- `opus` -- Reasoning-critical roles: pattern selection, complex capability analysis, ambiguous-spec design, large-team coordination.
+- `sonnet` -- Routine, well-scoped implementation work where deeper reasoning would be wasted.
 - `haiku` -- Simple/repetitive tasks, relay, formatting.
+
+If the team-lead has signaled a `MODEL POLICY` instruction (e.g., the user invoked `/squad --sonnet`), follow it -- default workers to that model unless a specific role cannot function with it.
 
 #### SKILLS NEEDED Section
 
@@ -133,12 +136,12 @@ Design phase: FULL
 AGENTS REQUESTED:
 1. Name: auth-implementer
    Type: independent-contributor
-   Model: sonnet
+   Model: opus
    Role: Implements JWT auth middleware and token management
 
 2. Name: test-writer
    Type: testing-expert
-   Model: sonnet
+   Model: opus
    Role: Writes unit and integration tests for auth changes
 
 3. Name: auth-reviewer
@@ -174,7 +177,7 @@ Design phase: SHORT-CIRCUITED -- well-known 2-agent pattern, no skill gaps, obvi
 AGENTS REQUESTED:
 1. Name: doc-writer
    Type: document-maintainer
-   Model: sonnet
+   Model: opus
    Role: Revises API documentation based on reviewer feedback
 
 2. Name: doc-critic
@@ -310,363 +313,6 @@ Recommendations:
 - Obtain dashboard design spec and spawn a new squad for the UI work
 - Optimize user_sessions dbt model with incremental materialization
 ```
-
----
-
-## 3. Announcer Protocol
-
-**Sender:** any agent
-**Receiver:** announcer agent
-**Purpose:** Fan out a single message to multiple named recipients.
-
-### Relay Request Format
-
-Sent by any agent to the announcer:
-
-```
-[TO: recipient-1, recipient-2, recipient-3]
-[FROM: sender-name]
----
-Message body here.
-Multiple lines are fine.
-```
-
-### Field Specifications
-
-| Field | Required | Format | Description |
-|-------|----------|--------|-------------|
-| TO | Yes | `[TO: name1, name2, ...]` | Comma-separated list of recipient agent names. Whitespace around names is trimmed. |
-| FROM | Yes | `[FROM: sender-name]` | The name of the agent sending the message. Used for attribution in forwarded messages. |
-| Separator | Yes | `---` | Three hyphens on a line by themselves, separating headers from body. |
-| Body | Yes | Free text, one or more lines | The message content. Forwarded exactly as-is, with no modification. |
-
-### Forwarded Message Format
-
-The announcer sends to each recipient:
-
-```
-[FROM: sender-name] (via announcer)
----
-Message body here.
-Multiple lines are fine.
-```
-
-The `(via announcer)` suffix indicates the message was relayed, not sent directly. The body is forwarded verbatim.
-
-### Delivery Confirmation
-
-After forwarding to all recipients, the announcer sends back to the original sender:
-
-```
-Delivered to: recipient-1, recipient-2, recipient-3
-```
-
-If any delivery failed:
-
-```
-Delivered to: recipient-1, recipient-3
-Failed: recipient-2 (agent not found)
-```
-
-### Error Handling
-
-If the incoming message does not match the expected format (missing `[TO: ...]`, missing `[FROM: ...]`, or missing `---` separator), the announcer sends the message back to the sender with:
-
-```
-Could not parse relay request. Expected format:
-[TO: ...]
-[FROM: ...]
----
-Body
-```
-
-### Rules
-
-1. The announcer **never** reads, interprets, summarizes, or responds to message content. It is a dumb pipe.
-2. The announcer **never** modifies the message body. It forwards exactly as received.
-3. The announcer **never** decides who should receive a message. The sender's `[TO: ...]` list is authoritative.
-4. The announcer **never** engages in conversation beyond parse-forward-confirm.
-5. If a recipient name looks unusual, the announcer attempts delivery anyway and reports errors after the fact.
-6. One relay request is processed at a time. All deliveries and the confirmation are completed before handling the next incoming message.
-
-### Example: Squad-Leader Briefing Workers
-
-Squad-leader sends to announcer:
-
-```
-[TO: api-worker, db-worker, test-writer]
-[FROM: squad-leader-backend]
----
-Sprint kickoff: the shared API contract is in docs/api-spec.yaml.
-Your individual task assignments are in the task list.
-Please start with your unblocked tasks and message me if you hit any issues.
-```
-
-Announcer forwards to `api-worker`:
-
-```
-[FROM: squad-leader-backend] (via announcer)
----
-Sprint kickoff: the shared API contract is in docs/api-spec.yaml.
-Your individual task assignments are in the task list.
-Please start with your unblocked tasks and message me if you hit any issues.
-```
-
-(Same message forwarded to `db-worker` and `test-writer`.)
-
-Announcer confirms to `squad-leader-backend`:
-
-```
-Delivered to: api-worker, db-worker, test-writer
-```
-
-### Example: Peer-to-Peer Notification
-
-A worker notifies peers about a breaking change:
-
-```
-[TO: api-worker, db-worker]
-[FROM: auth-worker]
----
-Auth token format changed from JWT to opaque tokens.
-Update your integration tests to use the new token format.
-See src/auth/token.ts for the new interface.
-```
-
-### Example: Team-Lead Status Request
-
-The team-lead checks on specific squads:
-
-```
-[TO: squad-leader-api, squad-leader-frontend]
-[FROM: team-lead]
----
-Status check: please report your squad's current progress and any blockers.
-```
-
----
-
-## 4. Pub/Sub Relayer Protocol
-
-**Sender:** any agent
-**Receiver:** pub-sub-relayer agent
-**Purpose:** Topic-based message routing via a file-backed channel registry, decoupling publishers from subscribers.
-
-### Registry File
-
-The pub-sub-relayer manages a JSON registry file at `${CLAUDE_PLUGIN_ROOT}/state/pubsub-channels.json`.
-
-```json
-{
-  "channels": {
-    "build-events": ["tester", "deployer"],
-    "code-changes": ["reviewer", "tester", "docs-writer"],
-    "errors": ["debugger", "team-lead"]
-  }
-}
-```
-
-The registry is the single source of truth for subscriptions. The relay reads it fresh before every PUBLISH operation and writes it on every SUBSCRIBE/UNSUBSCRIBE.
-
-### PUBLISH Format
-
-Sent by any agent to the pub-sub-relayer:
-
-```
-PUBLISH topic-name
-[FROM: sender-name]
----
-Message body here.
-Multiple lines are fine.
-```
-
-#### Field Specifications
-
-| Field | Required | Format | Description |
-|-------|----------|--------|-------------|
-| PUBLISH | Yes | `PUBLISH topic-name` | First line. The topic/channel to publish to. |
-| FROM | Yes | `[FROM: sender-name]` | The name of the publishing agent. |
-| Separator | Yes | `---` | Three hyphens, separating headers from body. |
-| Body | Yes | Free text, one or more lines | The message content. Forwarded exactly as-is. |
-
-#### Forwarded Message Format
-
-The pub-sub-relayer sends to each subscriber:
-
-```
-[FROM: sender-name] (via pub-sub-relayer, topic: topic-name)
----
-Message body here.
-Multiple lines are fine.
-```
-
-The `(via pub-sub-relayer, topic: topic-name)` suffix indicates the message was routed by topic, not sent directly. The body is forwarded verbatim.
-
-#### Delivery Confirmation
-
-After forwarding to all subscribers, the pub-sub-relayer sends back to the publisher:
-
-```
-Published to topic: topic-name
-Delivered to: subscriber-1, subscriber-2, subscriber-3
-```
-
-If any delivery failed:
-
-```
-Published to topic: topic-name
-Delivered to: subscriber-1, subscriber-3
-Failed: subscriber-2 (agent not found)
-```
-
-If no subscribers exist for the topic:
-
-```
-No subscribers for topic: topic-name. Message not delivered.
-```
-
-### SUBSCRIBE Format
-
-```
-SUBSCRIBE topic-name
-[AGENT: agent-name]
-```
-
-| Field | Required | Format | Description |
-|-------|----------|--------|-------------|
-| SUBSCRIBE | Yes | `SUBSCRIBE topic-name` | First line. The topic/channel to subscribe to. |
-| AGENT | Yes | `[AGENT: agent-name]` | The agent to add to the subscriber list. |
-
-#### Confirmation
-
-```
-Subscribed: agent-name -> topic-name
-Current subscribers: subscriber-1, subscriber-2, agent-name
-```
-
-If already subscribed:
-
-```
-agent-name is already subscribed to topic-name.
-```
-
-### UNSUBSCRIBE Format
-
-```
-UNSUBSCRIBE topic-name
-[AGENT: agent-name]
-```
-
-| Field | Required | Format | Description |
-|-------|----------|--------|-------------|
-| UNSUBSCRIBE | Yes | `UNSUBSCRIBE topic-name` | First line. The topic/channel to unsubscribe from. |
-| AGENT | Yes | `[AGENT: agent-name]` | The agent to remove from the subscriber list. |
-
-#### Confirmation
-
-```
-Unsubscribed: agent-name from topic-name
-Remaining subscribers: subscriber-1, subscriber-2
-```
-
-If the channel is now empty:
-
-```
-Unsubscribed: agent-name from topic-name. Channel removed (no remaining subscribers).
-```
-
-If the agent was not subscribed:
-
-```
-agent-name is not subscribed to topic-name.
-```
-
-### Error Handling
-
-If the incoming message does not match any expected format:
-
-```
-Could not parse request. Expected one of:
-PUBLISH topic-name / [FROM: ...] / --- / Body
-SUBSCRIBE topic-name / [AGENT: ...]
-UNSUBSCRIBE topic-name / [AGENT: ...]
-```
-
-### Rules
-
-1. The pub-sub-relayer **never** reads, interprets, summarizes, or responds to published message content. It is a dumb pipe.
-2. The pub-sub-relayer **never** modifies the message body. It forwards exactly as received.
-3. The pub-sub-relayer **never** decides who should receive messages. The registry is authoritative.
-4. The pub-sub-relayer **never** engages in conversation beyond parse-route-confirm.
-5. The pub-sub-relayer **does not** forward a message back to the publisher, even if the publisher is a subscriber.
-6. The pub-sub-relayer reads the registry fresh before every PUBLISH -- it never caches subscriber lists.
-7. One request is processed at a time. All deliveries and the confirmation are completed before handling the next message.
-
-### Example: Build Pipeline Notifications
-
-Setup -- squad-leader subscribes agents to channels:
-
-```
-SUBSCRIBE build-events
-[AGENT: tester]
-```
-
-```
-SUBSCRIBE build-events
-[AGENT: deployer]
-```
-
-Build worker publishes a result:
-
-```
-PUBLISH build-events
-[FROM: build-worker]
----
-Build #42 succeeded. Artifacts at dist/. Ready for testing and deploy.
-```
-
-Pub-sub-relay forwards to `tester`:
-
-```
-[FROM: build-worker] (via pub-sub-relayer, topic: build-events)
----
-Build #42 succeeded. Artifacts at dist/. Ready for testing and deploy.
-```
-
-(Same message forwarded to `deployer`.)
-
-Pub-sub-relay confirms to `build-worker`:
-
-```
-Published to topic: build-events
-Delivered to: tester, deployer
-```
-
-### Example: Error Channel
-
-Multiple agents subscribe to an error channel for monitoring:
-
-```
-SUBSCRIBE errors
-[AGENT: debugger]
-```
-
-```
-SUBSCRIBE errors
-[AGENT: team-lead]
-```
-
-Any agent can publish errors:
-
-```
-PUBLISH errors
-[FROM: api-worker]
----
-Unhandled exception in /api/users endpoint: TypeError: Cannot read property 'id' of undefined
-Stack trace: ...
-```
-
-Both `debugger` and `team-lead` receive the error notification automatically.
 
 ---
 

@@ -1,12 +1,26 @@
 ---
 name: therapist
-description: Facilitates a structured "therapy session" to improve the working relationship between you and Claude. Spawns an agent team — a session analyst reviews recent session logs, then a therapist leads a reflective discussion where both you and Claude can share what's working and what isn't. Produces 3-5 actionable recommendations. Use when frustrated with Claude, after a bad session, for periodic check-ins, or when you want to optimize your workflow. Invoke with /therapist or by saying things like "let's do a therapy session", "how are we working together", "session retrospective", "interaction review", "I'm frustrated with how we're working", "we keep getting stuck", "we keep talking past each other", "let's talk about how this is going", or "I'm not getting what I want from Claude".
+description: Run a structured human-Claude collaboration retrospective. Use for /therapist, therapy sessions, interaction reviews, workflow check-ins, frustration recovery, or improving how the user and Claude work together.
 model: opus
 ---
 
 # Therapist Session: Human-AI Collaboration Review
 
 You are about to facilitate a therapy session for the working relationship between the user and Claude. This is a structured, multi-agent process. Follow it precisely.
+
+## Invocation Examples
+
+Invoke this skill when the user runs `/therapist` or asks for a collaboration review using phrases like:
+
+- "Let's do a therapy session."
+- "How are we working together?"
+- "Session retrospective."
+- "Interaction review."
+- "I'm frustrated with how we're working."
+- "We keep getting stuck."
+- "We keep talking past each other."
+- "Let's talk about how this is going."
+- "I'm not getting what I want from Claude."
 
 ## Important: Agent Team Requirement
 

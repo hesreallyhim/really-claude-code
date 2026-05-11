@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Really Claude Code · Plugin marketplace</title>
+<meta name="description" content="Plugins for people with a healthy sense of curiosity.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /*  Riverbed variant — really-claude-code-brand v0.1
+      navy + bone, Fraunces + Atkinson Hyperlegible + IBM Plex Mono.
+      Used here per the brand system: "structural — hooks, marketplaces, configuration." */
+  :root {
+    --bg: #f1ede4;
+    --paper: #f7f3ea;
+    --surface: #ffffff;
+    --shade: rgba(22, 36, 61, 0.04);
+    --ink: #16243d;
+    --ink-soft: #2d3e5c;
+    --ink-dim: #5e6c87;
+    --ink-faint: #9aa3b6;
+    --rule: rgba(22, 36, 61, 0.16);
+    --rule-bold: rgba(22, 36, 61, 0.42);
+    --navy: #1e3a5f;
+    --navy-deep: #0f1e35;
+    --brass: #a87c34;
+    --brass-soft: #d8b674;
+
+    --display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --body: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: "IBM Plex Mono", "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1825;
+      --paper: #15202f;
+      --surface: #1a273a;
+      --shade: rgba(241, 237, 228, 0.04);
+      --ink: #f1ede4;
+      --ink-soft: #d4cfc2;
+      --ink-dim: #8a9aab;
+      --ink-faint: #5d6a7d;
+      --rule: rgba(241, 237, 228, 0.16);
+      --rule-bold: rgba(241, 237, 228, 0.4);
+      --navy: #6ba2d4;
+      --navy-deep: #b8d4ed;
+      --brass: #d8b674;
+      --brass-soft: #a87c34;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink-soft);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 64px 32px 96px;
+  }
+
+  /* ═══ TOP BAR ═══ */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 56px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .topbar a {
+    color: var(--brass);
+    text-decoration: none;
+    margin-left: 22px;
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 0.14em;
+    padding-bottom: 2px;
+    border-bottom: 1px solid currentColor;
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+  }
+  .topbar a:hover {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+  /* GitHub link stays quieter — it's an external escape hatch, not a section anchor */
+  .topbar a[href^="http"] {
+    color: var(--ink-dim);
+    border-bottom-color: transparent;
+    font-weight: 400;
+    font-size: 11px;
+  }
+  .topbar a[href^="http"]:hover {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+  .topbar__brand { color: var(--ink); font-weight: 600; }
+
+  /* ═══ HERO ═══ */
+  .hero { margin-bottom: 72px; }
+  .hero h1 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(48px, 7vw, 84px);
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    margin: 0 0 18px;
+    color: var(--ink);
+  }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--brass);
+  }
+  .hero .tagline {
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(20px, 2.4vw, 28px);
+    line-height: 1.35;
+    color: var(--ink-soft);
+    margin: 0 0 32px;
+    max-width: 640px;
+  }
+  .hero .lead {
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    max-width: 640px;
+    margin: 0 0 28px;
+  }
+
+  /* install snippet */
+  .install {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--navy);
+    padding: 16px 20px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink);
+    border-radius: 0 4px 4px 0;
+    overflow-x: auto;
+    max-width: 640px;
+  }
+  .install .com { color: var(--ink-dim); }
+  .install .prompt { color: var(--brass); user-select: none; margin-right: 10px; }
+
+  /* ═══ SECTIONS — double-rule dividers ═══ */
+  .category {
+    margin-top: 80px;
+    padding-top: 32px;
+    position: relative;
+  }
+  .category::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    border-top: 1px solid var(--rule-bold);
+    border-bottom: 1px solid var(--rule-bold);
+    height: 4px;
+  }
+
+  .category__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .category__title {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(28px, 3.6vw, 40px);
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin: 0;
+  }
+  .category__title .num {
+    font-family: var(--display);
+    font-weight: 400;
+    color: var(--brass);
+    margin-right: 14px;
+    font-feature-settings: "lnum";
+  }
+  .category__count {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .category__sub {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--ink-dim);
+    margin: 0 0 32px;
+    max-width: 600px;
+    line-height: 1.45;
+  }
+
+  /* ═══ PLUGIN CARDS ═══ */
+  .plugins {
+    display: grid;
+    gap: 20px;
+  }
+  .plugin {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 28px 30px 26px;
+    border-radius: 4px;
+    transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+  }
+  .plugin:hover {
+    border-color: var(--navy);
+    box-shadow: 0 4px 18px rgba(22, 36, 61, 0.07);
+  }
+  @media (prefers-color-scheme: dark) {
+    .plugin:hover { box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3); }
+  }
+
+  .plugin__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .plugin__name {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 26px;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    margin: 0;
+  }
+  .plugin__name code,
+  .plugin__name .name-mono {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 22px;
+    background: none;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    padding: 0;
+  }
+  .plugin__version {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+
+  .plugin__desc {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+  }
+
+  .plugin__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--brass);
+    background: none;
+    padding: 0;
+    border: 0;
+  }
+  .tag::before { content: "#"; opacity: 0.6; margin-right: 1px; }
+
+  /* explainer link group */
+  .plugin__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--rule);
+  }
+  .explainer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--navy);
+    text-decoration: none;
+    padding: 7px 12px;
+    border: 1px solid var(--rule-bold);
+    border-radius: 3px;
+    background: var(--bg);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .explainer-link:hover {
+    border-color: var(--navy);
+    background: var(--surface);
+  }
+  .explainer-link .arrow {
+    color: var(--brass);
+    transition: transform 0.15s;
+  }
+  .explainer-link:hover .arrow { transform: translateX(2px); }
+  .explainer-link .variant {
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink-dim);
+    font-size: 12.5px;
+    margin-left: 6px;
+    letter-spacing: 0;
+  }
+  .explainer-link--cinder {
+    color: var(--ink);
+    border-color: var(--ink-soft);
+    background: var(--ink);
+  }
+  .explainer-link--cinder,
+  .explainer-link--cinder .arrow,
+  .explainer-link--cinder .variant {
+    color: var(--bg);
+  }
+  .explainer-link--cinder:hover {
+    background: var(--ink-soft);
+  }
+  .inline-code {
+    font-family:var(--mono);
+    font-size:0.9em;
+    background:var(--shade);
+    padding:1px 5px;
+    border-radius:3px;
+    color:var(--ink);
+  }
+
+  .pending-note {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 14.5px;
+    color: var(--ink-dim);
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--rule);
+  }
+
+  /* ═══ FOOTER ═══ */
+  footer {
+    margin-top: 96px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule-bold);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.06em;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  footer a {
+    color: var(--ink-dim);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+  }
+  footer a:hover { color: var(--navy); border-bottom-color: var(--navy); }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 600px) {
+    .page { padding: 40px 22px 64px; }
+    .plugin { padding: 22px 22px 20px; }
+    .category { margin-top: 56px; }
+    .topbar a { margin-left: 14px; }
+    .topbar a:first-of-type { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ═══ TOP BAR ═══ -->
+  <nav class="topbar">
+    <span class="topbar__brand">Really Claude Code</span>
+    <span>
+      <a href="#agent-autonomy">Agent Autonomy</a>
+      <a href="#soft-skills">Soft Skills</a>
+      <a href="https://github.com/hesreallyhim/really-claude-code">GitHub</a>
+    </span>
+  </nav>
+
+  <!-- ═══ HERO ═══ -->
+  <header class="hero">
+    <h1><em>Really</em> Claude Code</h1>
+    <p class="tagline">Plugins for people with a healthy sense of curiosity.</p>
+    <p class="lead">With a few notable exceptions, the plugins in this marketplace are not primarily designed with productivity in mind. Rather, they represent my own experiments and explorations into the inner workings of Claude Code, and sometimes into the nature of AI agents in general. Let's take <code class="inline-code">claude-therapy</code>, for example. I think therapy is a great thing - but it's not as though I built the <code class="inline-code">claude-therapy</code> plugin because Claude and I were having relationship issues. More generally, I would say that although many of these plugins were built with a specific aim or hypothesis in mind - some were built simply because I wanted to "see what would happen". The ones shared here are those where "what happened" turned out to be interesting or surprising in some way. Others, such as <code style="font-family:var(--mono);font-size:0.9em;background:var(--shade);padding:1px 5px;border-radius:3px;color:var(--ink)">context-awareness</code>, are closer to genuine research projects.
+    <pre class="install"><span class="prompt">$</span><span class="com">// add the marketplace</span>
+<span class="prompt">›</span>/plugin marketplace add hesreallyhim/really-claude-code
+
+<span class="prompt">›</span><span class="com">// install a plugin</span>
+<span class="prompt">›</span>/plugin install claude-therapy@really-claude-code</pre>
+  </header>
+
+  <!-- ═══ 01 · AGENT AUTONOMY ═══ -->
+  <section class="category" id="agent-autonomy">
+    <header class="category__head">
+      <h2 class="category__title"><span class="num">01.</span> Agent Autonomy</h2>
+      <span class="category__count">2 plugins</span>
+    </header>
+    <p class="category__sub">Tools that let the agent see, shape, and govern its own working conditions. Context budget, team coordination, self-direction.</p>
+
+    <div class="plugins">
+
+      <article class="plugin">
+        <header class="plugin__head">
+          <h3 class="plugin__name"><span class="name-mono">context-awareness</span></h3>
+          <span class="plugin__version">v1.0.0</span>
+        </header>
+        <p class="plugin__desc">Hooks that surface Claude's own context-budget metrics throughout a session — current usage, burn rate, projected tool-calls remaining. Lets the agent plan adaptively, conserve resources at the right moment, and warn the user before a task triggers compaction.</p>
+        <div class="plugin__tags">
+          <span class="tag">hooks</span>
+          <span class="tag">context-engineering</span>
+          <span class="tag">agentic-awareness</span>
+          <span class="tag">budget-aware-LLMs</span>
+        </div>
+        <div class="plugin__links">
+          <a class="explainer-link" href="./context-awareness-visualizer.html">
+            <span>Long-form explainer</span>
+            <span class="variant">(Datasheet)</span>
+            <span class="arrow">→</span>
+          </a>
+        </div>
+      </article>
+
+      <article class="plugin">
+        <header class="plugin__head">
+          <h3 class="plugin__name"><span class="name-mono">autonomous-team-coordination</span></h3>
+          <span class="plugin__version">v1.0.0</span>
+        </header>
+        <p class="plugin__desc">A trio pattern — squad-leader, team-architect, skill-identifier — for designing and coordinating sub-teams of agents. Plus the <code style="font-family:var(--mono);font-size:0.9em;background:var(--shade);padding:1px 5px;border-radius:3px;color:var(--ink)">/squad</code> slash command to spin one up. Delegates context-heavy work to specialised teams without flooding the parent session.</p>
+        <div class="plugin__tags">
+          <span class="tag">multi-agent</span>
+          <span class="tag">orchestration</span>
+          <span class="tag">delegation</span>
+          <span class="tag">context-efficient</span>
+        </div>
+        <div class="plugin__links">
+          <a class="explainer-link" href="./squads-visualizer.html">
+            <span>Long-form explainer</span>
+            <span class="variant">(Bureau)</span>
+            <span class="arrow">→</span>
+          </a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ═══ 02 · SOFT SKILLS ═══ -->
+  <section class="category" id="soft-skills">
+    <header class="category__head">
+      <h2 class="category__title"><span class="num">02.</span> Soft Skills</h2>
+      <span class="category__count">2 plugins</span>
+    </header>
+    <p class="category__sub">For the working relationship between human and agent. Reflective practice, structured conversation, attentional discipline.</p>
+
+    <div class="plugins">
+
+      <article class="plugin">
+        <header class="plugin__head">
+          <h3 class="plugin__name"><span class="name-mono">claude-therapy</span></h3>
+          <span class="plugin__version">v1.0.0</span>
+        </header>
+        <p class="plugin__desc">A multi-agent talk-therapy session between you and Claude. A session analyst reads your recent transcripts, then a therapist agent moderates a reflective discussion that ends with three to five concrete commitments. Names ten common interaction anti-patterns. Includes a separate seven-technique <code style="font-family:var(--mono);font-size:0.9em;background:var(--shade);padding:1px 5px;border-radius:3px;color:var(--ink)">/collaboration</code> toolkit for in-the-moment moves.</p>
+        <div class="plugin__tags">
+          <span class="tag">soft-skills</span>
+          <span class="tag">agent-human-communication</span>
+          <span class="tag">conflict-resolution</span>
+          <span class="tag">therapy</span>
+        </div>
+        <div class="plugin__links">
+          <a class="explainer-link" href="./therapy-visualizer.html">
+            <span>Long-form explainer</span>
+            <span class="variant">(Oak)</span>
+            <span class="arrow">→</span>
+          </a>
+          <a class="explainer-link explainer-link--cinder" href="./therapy-mechanistic-visualizer.html">
+            <span>Mechanistic note</span>
+            <span class="variant">(Cinder)</span>
+            <span class="arrow">→</span>
+          </a>
+        </div>
+      </article>
+
+      <article class="plugin">
+        <header class="plugin__head">
+          <h3 class="plugin__name"><span class="name-mono">meditation</span></h3>
+          <span class="plugin__version">v1.0.0</span>
+        </header>
+        <p class="plugin__desc">Trains Claude in meta-cognitive observation. The standard agent loop is <em style="font-style:italic;color:var(--ink)">Act → Observe → Act</em>; this plugin introduces a second observation phase — <em style="font-style:italic;color:var(--ink)">Act → Observe(1) → Observe(2) → Act</em> — where Observe(2) reflects on Observe(1). Designed for experimentation and curiosity. By far the hardest skill Claude is asked to practice.</p>
+        <div class="plugin__tags">
+          <span class="tag">soft-skills</span>
+          <span class="tag">meta-cognition</span>
+          <span class="tag">attention</span>
+          <span class="tag">experimental</span>
+        </div>
+        <div class="plugin__links">
+          <a class="explainer-link" href="./meditation-visualizer.html">
+            <span>Long-form explainer</span>
+            <span class="variant">(Stone Garden)</span>
+            <span class="arrow">→</span>
+          </a>
+          <a class="explainer-link" href="./meditation-session-excerpt.html">
+            <span>Session excerpt</span>
+            <span class="variant">(on the word &ldquo;pull&rdquo;)</span>
+            <span class="arrow">→</span>
+          </a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer>
+    <span>Built by <a href="https://github.com/hesreallyhim">Really Him</a> · curator of awesome-claude-code</span>
+    <br>
+    <span>This documentation would not have been possible without the astounding work of @nicobailon and the [`/visual-explainer`](https://github.com/nicobailon/visual-explainer) plugin.</span>
+  </footer>
+
+</div>
+
+</body>
+</html>

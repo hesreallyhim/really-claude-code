@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 480" role="img" aria-labelledby="trioTitle trioDesc">
+  <title id="trioTitle">Trio pattern organizational chart</title>
+  <desc id="trioDesc">Three role boxes — squad-leader at top consulting both team-architect and skill-identifier below — rendered as a paper organizational chart.</desc>
+
+  <defs>
+    <filter id="paperShadow2" x="-2%" y="-2%" width="104%" height="106%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="3" dy="5" result="o"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="ruledLines2" x="0" y="0" width="40" height="22" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="22" x2="40" y2="22" stroke="#bda671" stroke-width="0.5" opacity="0.22"/>
+    </pattern>
+    <pattern id="paperGrain2" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
+      <rect width="2" height="2" fill="#f5ecd0"/>
+      <rect x="0" y="0" width="1" height="1" fill="#efe3bd" opacity="0.35"/>
+    </pattern>
+  </defs>
+
+  <rect width="760" height="480" fill="none"/>
+
+  <!-- Paper sheet -->
+  <g filter="url(#paperShadow2)">
+    <rect x="40" y="32" width="680" height="416" fill="url(#paperGrain2)"/>
+    <rect x="40" y="32" width="680" height="416" fill="url(#ruledLines2)"/>
+  </g>
+
+  <!-- Header banner -->
+  <rect x="40" y="32" width="680" height="58" fill="#1a1a2e"/>
+  <line x1="40" y1="90" x2="720" y2="90" stroke="#00ffff" stroke-width="2"/>
+  <line x1="40" y1="95" x2="720" y2="95" stroke="#00ffff" stroke-width="0.7" opacity="0.5"/>
+  <text x="64" y="56" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#00ffff" letter-spacing="3">FORM RCC-002 :: ORGANIZATIONAL CHART</text>
+  <text x="64" y="78" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="22" font-weight="700" fill="#f5ecd0" letter-spacing="5">THE TRIO PATTERN</text>
+  <text x="696" y="56" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#aab" text-anchor="end" letter-spacing="1.5">design phase</text>
+  <text x="696" y="78" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#00ffff" text-anchor="end" letter-spacing="2">3 ROLES · 1 PHASE</text>
+
+  <!-- ====== SQUAD-LEADER (top) ====== -->
+  <g transform="translate(280, 116)">
+    <rect x="0" y="0" width="200" height="78" fill="#fdf6df" stroke="#1a1a2e" stroke-width="1.5"/>
+    <rect x="0" y="0" width="200" height="20" fill="#1a1a2e"/>
+    <text x="100" y="14" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#00ffff" text-anchor="middle" letter-spacing="3">ROLE · 01</text>
+    <text x="100" y="40" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="14" font-weight="700" fill="#1f2937" text-anchor="middle" letter-spacing="2">SQUAD-LEADER</text>
+    <text x="100" y="58" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#1f2937" text-anchor="middle">facilitator · coordinator</text>
+    <text x="100" y="71" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" text-anchor="middle" letter-spacing="1">synthesizes · dispatches · unblocks</text>
+  </g>
+
+  <!-- consultation lines (faint dashed, both directions) -->
+  <g stroke="#1a1a2e" stroke-width="1.2" stroke-dasharray="4 4" fill="none" opacity="0.7">
+    <!-- left line: SL → TA -->
+    <path d="M 350 196 Q 280 246 230 290"/>
+    <!-- right line: SL → SI -->
+    <path d="M 410 196 Q 480 246 530 290"/>
+  </g>
+
+  <!-- midpoint label -->
+  <g transform="translate(380, 240)">
+    <rect x="-46" y="-9" width="92" height="18" fill="#f5ecd0" stroke="#1a1a2e" stroke-width="0.5"/>
+    <text font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#1a1a2e" text-anchor="middle" letter-spacing="2">CONSULTS BOTH</text>
+  </g>
+
+  <!-- ====== TEAM-ARCHITECT (bottom-left) ====== -->
+  <g transform="translate(110, 290)">
+    <rect x="0" y="0" width="240" height="92" fill="#fdf6df" stroke="#1a1a2e" stroke-width="1.5"/>
+    <rect x="0" y="0" width="240" height="20" fill="#1a1a2e"/>
+    <text x="120" y="14" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#00ffff" text-anchor="middle" letter-spacing="3">ROLE · 02</text>
+    <text x="120" y="40" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="14" font-weight="700" fill="#1f2937" text-anchor="middle" letter-spacing="2">TEAM-ARCHITECT</text>
+    <text x="120" y="58" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#1f2937" text-anchor="middle">pattern · topology · roles</text>
+    <text x="120" y="76" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" text-anchor="middle" letter-spacing="1">designs the ideal team</text>
+    <text x="120" y="88" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="8" fill="#7a6c44" text-anchor="middle" letter-spacing="1.5">references team-patterns skill</text>
+  </g>
+
+  <!-- ====== SKILL-IDENTIFIER (bottom-right) ====== -->
+  <g transform="translate(410, 290)">
+    <rect x="0" y="0" width="240" height="92" fill="#fdf6df" stroke="#1a1a2e" stroke-width="1.5"/>
+    <rect x="0" y="0" width="240" height="20" fill="#1a1a2e"/>
+    <text x="120" y="14" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#00ffff" text-anchor="middle" letter-spacing="3">ROLE · 03</text>
+    <text x="120" y="40" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="14" font-weight="700" fill="#1f2937" text-anchor="middle" letter-spacing="2">SKILL-IDENTIFIER</text>
+    <text x="120" y="58" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#1f2937" text-anchor="middle">capabilities · gaps · matches</text>
+    <text x="120" y="76" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" text-anchor="middle" letter-spacing="1">maps roles to skills</text>
+    <text x="120" y="88" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="8" fill="#7a6c44" text-anchor="middle" letter-spacing="1.5">references skill-identification skill</text>
+  </g>
+
+  <!-- Footer note: contingent agent-explorer -->
+  <g transform="translate(60, 412)">
+    <line x1="0" y1="0" x2="640" y2="0" stroke="#1a1a2e" stroke-width="0.6" opacity="0.6" stroke-dasharray="2 2"/>
+    <text x="0" y="18" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" letter-spacing="2">CONTINGENT FOURTH</text>
+    <text x="148" y="18" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#1f2937"><tspan font-weight="700">agent-explorer</tspan> — invoked only when a gap survives composition</text>
+  </g>
+</svg>

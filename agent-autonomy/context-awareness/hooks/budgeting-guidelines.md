@@ -5,25 +5,32 @@ You receive context budget notifications as system reminders at two points:
 - **UserPromptSubmit** — before you respond. Full metrics, progressively enriched:
 
 ```
-Turn 1:  [context: 12% (very small) | burn rate: calculating...]
-Turn 2+: [context: 14% (very small) | +2.0% last turn | burn rate: calculating...]
-Turn 2+: [context: 32% (small) | +3.2% last turn | ~0.38%/tool | ~179 tool calls remaining]
+Turn 1:  [context: 12% used (very small) | burn rate: calculating...]
+Turn 2+: [context: 14% used (very small) | +2.0% last turn | burn rate: calculating...]
+Turn 2+: [context: 32% used (small) | +3.2% last turn | ~0.38%/tool | ~179 tool calls remaining]
 ```
 
 - **PostToolUse / PostToolUseFailure** — after tool calls. Brief:
 
 ```
-[context: 33% (small)]
+[context: 33% used (small)]
 ```
 
-Format: always starts with `[context:`, ends with `]`, fields pipe-delimited.
+Brief notifications are **throttled by tier** to reduce noise when
+context pressure is low: emitted every 10th tool call at *very small*,
+every 5th at *small*, every 3rd at *medium*, and every tool call at
+*large*, *very large*, or *critical*. The absence of a brief notification
+on a given tool call is normal — it does not indicate the hook failed.
+
+Format: always starts with `[context:`, the percentage is followed by the
+literal word `used`, ends with `]`, fields pipe-delimited.
 Fields appear only once enough data exists to compute them.
 
 ### Field reference
 
 | Field | Example | Meaning |
 |-------|---------|---------|
-| percentage (level) | `32% (small)` | Current usage and severity tier |
+| percentage used (level) | `32% used (small)` | Fraction of context window consumed, plus severity tier |
 | delta | `+3.2% last turn` | Context consumed by previous turn |
 | burn rate | `~0.38%/tool` | Session-average cost per tool call |
 | remaining | `~179 tool calls remaining` | Projected budget in tool-call units (capped at `>1000`) |

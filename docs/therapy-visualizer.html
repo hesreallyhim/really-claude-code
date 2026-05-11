@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Therapy — A Plugin for the Working Relationship</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf6f0;
+    --bg-deep: #f3ead9;
+    --surface: #ffffff;
+    --surface-warm: #f5ede0;
+    --surface-recessed: #efe5d2;
+    --border: rgba(74, 50, 32, 0.14);
+    --border-strong: rgba(74, 50, 32, 0.28);
+    --ink: #2a1f1a;
+    --ink-soft: #4a3a2e;
+    --ink-dim: #7a6754;
+    --ink-faint: #a89580;
+
+    --terra: #b25a3c;
+    --terra-deep: #8a3f26;
+    --terra-soft: #e8c4b2;
+    --terra-bg: #f5dccd;
+
+    --sage: #6a7d52;
+    --sage-deep: #4d5c3a;
+    --sage-soft: #c5d0b1;
+    --sage-bg: #dde3cd;
+
+    --ochre: #a87c34;
+    --ochre-bg: #ecdcb8;
+
+    --plum: #6e3a5a;
+    --plum-bg: #e2cbd8;
+
+    --rule: rgba(74, 50, 32, 0.12);
+
+    --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+    --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1612;
+      --bg-deep: #14110d;
+      --surface: #211c17;
+      --surface-warm: #28221c;
+      --surface-recessed: #1c1814;
+      --border: rgba(255, 235, 210, 0.08);
+      --border-strong: rgba(255, 235, 210, 0.18);
+      --ink: #f0e6d2;
+      --ink-soft: #d8c8ad;
+      --ink-dim: #a89580;
+      --ink-faint: #6f5f4d;
+
+      --terra: #d97a55;
+      --terra-deep: #f0997c;
+      --terra-soft: #5a2e1f;
+      --terra-bg: #3a1f15;
+
+      --sage: #9bb079;
+      --sage-deep: #b5cc91;
+      --sage-soft: #3d4a2c;
+      --sage-bg: #2a3320;
+
+      --ochre: #d4a557;
+      --ochre-bg: #3d2e15;
+
+      --plum: #b07390;
+      --plum-bg: #3a1f30;
+
+      --rule: rgba(255, 235, 210, 0.1);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(ellipse at top right, rgba(178, 90, 60, 0.06), transparent 50%),
+      radial-gradient(ellipse at bottom left, rgba(106, 125, 82, 0.05), transparent 50%);
+    background-attachment: fixed;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 80px 56px 120px;
+  }
+
+  /* ─────────── HERO ─────────── */
+  .hero {
+    padding: 32px 0 64px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 80px;
+    position: relative;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--terra-deep);
+    margin-bottom: 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 24px;
+    height: 1px;
+    background: var(--terra);
+  }
+
+  h1.title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(56px, 9vw, 124px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0 0 16px;
+  }
+  h1.title em {
+    font-style: italic;
+    color: var(--terra);
+  }
+
+  .deck {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-style: italic;
+    font-size: clamp(22px, 2.4vw, 32px);
+    line-height: 1.35;
+    color: var(--ink-soft);
+    max-width: 720px;
+    margin: 0 0 40px;
+  }
+
+  .lead {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    max-width: 680px;
+    margin: 0 0 36px;
+  }
+  .lead::first-letter {
+    font-family: var(--font-display);
+    font-size: 64px;
+    font-weight: 400;
+    float: left;
+    line-height: 0.85;
+    margin: 6px 12px 0 -2px;
+    color: var(--terra);
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 0;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-dim);
+    padding-top: 24px;
+    border-top: 1px dashed var(--rule);
+  }
+  .meta-row > * + *::before {
+    content: "·";
+    margin: 0 14px;
+    color: var(--ink-faint);
+  }
+  .meta-row strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ─────────── SECTIONS ─────────── */
+  section { margin-bottom: 96px; scroll-margin-top: 32px; }
+
+  .section-header {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 32px;
+    align-items: baseline;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--terra);
+    padding-top: 12px;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin: 0;
+  }
+  .section-title em { font-style: italic; color: var(--terra); }
+  .section-sub {
+    grid-column: 2;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 20px;
+    color: var(--ink-dim);
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+  .section-sub code {
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 15px;
+    background: var(--surface-recessed);
+    color: var(--terra-deep);
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .section-lead {
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    max-width: 780px;
+    margin: -8px 0 36px;
+  }
+  .section-lead em {
+    font-family: var(--font-display);
+    font-style: italic;
+    color: var(--ink);
+    font-size: 19px;
+  }
+  .section-lead code {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    background: var(--terra-bg);
+    color: var(--terra-deep);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(178, 90, 60, 0.18);
+  }
+
+  /* Part break — visual demarcation between major thematic shifts */
+  .part-break {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin: -40px 0 56px;
+  }
+  .part-break::before,
+  .part-break::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--sage), transparent);
+    opacity: 0.5;
+  }
+  .part-break__label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sage-deep);
+    white-space: nowrap;
+  }
+
+  /* Sage-tinted section variant for the collaboration toolkit */
+  .section--alt .section-num { color: var(--sage-deep); }
+  .section--alt .section-title em { color: var(--sage-deep); }
+  .section--alt .section-lead code {
+    background: var(--sage-bg);
+    color: var(--sage-deep);
+    border-color: rgba(106, 125, 82, 0.22);
+  }
+  @media (max-width: 600px) {
+    .part-break { gap: 14px; }
+    .part-break__label { font-size: 10px; letter-spacing: 0.14em; white-space: normal; text-align: center; }
+  }
+
+  /* ─────────── PROBLEM / PREMISE GRID ─────────── */
+  .premise-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+  .premise-prose p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin: 0 0 20px;
+  }
+  .premise-prose p strong { color: var(--ink); font-weight: 600; }
+  .premise-prose .aside-note {
+    margin-top: 28px;
+    padding: 18px 22px 18px 22px;
+    border-left: 2px solid var(--sage);
+    background: var(--sage-bg);
+    border-radius: 0 6px 6px 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  .premise-prose .aside-note .aside-mark {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sage-deep);
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .premise-prose .aside-note em {
+    font-family: var(--font-display);
+    font-style: italic;
+    color: var(--ink);
+    font-size: 17px;
+  }
+  .premise-prose .aside-note--terra {
+    border-left-color: var(--terra);
+    background: var(--terra-bg);
+    margin-top: 14px;
+  }
+  .premise-prose .aside-note--terra .aside-mark {
+    color: var(--terra-deep);
+  }
+
+  .pull-quote {
+    background: var(--surface-warm);
+    border-left: 3px solid var(--terra);
+    padding: 36px 40px;
+    border-radius: 0 6px 6px 0;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(74, 50, 32, 0.04);
+  }
+  .pull-quote::before {
+    content: "“";
+    font-family: var(--font-display);
+    font-size: 100px;
+    line-height: 0.7;
+    color: var(--terra-soft);
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    pointer-events: none;
+  }
+  .pull-quote p {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 26px;
+    line-height: 1.4;
+    color: var(--ink);
+    margin: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .pull-quote .attrib {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-dim);
+    margin-top: 20px;
+    font-style: normal;
+  }
+
+  /* ─────────── DIAGRAM SHELL ─────────── */
+  .diagram-frame {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(74, 50, 32, 0.04);
+  }
+  .diagram-caption {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-dim);
+    margin-top: 20px;
+    text-align: center;
+    padding-top: 16px;
+    border-top: 1px dashed var(--rule);
+  }
+  /* ─────────── TOPOLOGY SVG ─────────── */
+  .topo-svg-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .topo-svg {
+    width: 100%;
+    max-width: 540px;
+    height: auto;
+    display: block;
+    color: var(--ink-faint); /* default currentColor for arrowhead inheritance */
+  }
+
+  /* node fills + strokes */
+  .topo-trigger-bg   { fill: var(--ochre-bg);    stroke: var(--ochre);    stroke-width: 1.5; }
+  .topo-orch-bg      { fill: var(--surface-warm);stroke: var(--ink-dim);  stroke-width: 1.5; }
+  .topo-analyst-bg   { fill: var(--sage-bg);     stroke: var(--sage);     stroke-width: 1.5; }
+  .topo-report-bg    { fill: var(--surface);     stroke: var(--ink-dim);  stroke-width: 1.5; stroke-dasharray: 5 3; }
+  .topo-therapist-bg { fill: var(--plum-bg);     stroke: var(--plum);     stroke-width: 2; }
+  .topo-room-bg      { fill: var(--surface-warm);stroke: var(--terra);    stroke-width: 1.5; }
+  .topo-group-bg     { fill: var(--terra-bg);    stroke: var(--terra);    stroke-width: 2; }
+  .topo-caucus-bg    { fill: var(--surface);     stroke: var(--terra);    stroke-width: 1.5; stroke-dasharray: 5 3; }
+  .topo-final-bg     { fill: var(--surface);     stroke: var(--ink-dim);  stroke-width: 1.5; stroke-dasharray: 5 3; }
+  .topo-chip-bg      { fill: var(--surface-warm);stroke: var(--rule);     stroke-width: 1; }
+  .topo-conn-chip-bg { fill: var(--surface-warm);stroke: var(--terra);    stroke-width: 1; opacity: 0.96; }
+
+  /* edge lines (pipeline arrows) */
+  .topo-edge-g {
+    color: var(--ink-faint); /* drives currentColor for arrowhead */
+  }
+  .topo-edge-g line {
+    stroke: var(--ink-faint);
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  /* connector lines (room bidirectional dashed) */
+  .topo-conn-g {
+    color: var(--terra);
+  }
+  .topo-conn-g line {
+    stroke: var(--terra);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+    fill: none;
+  }
+
+  /* text */
+  .topo-svg text { dominant-baseline: alphabetic; }
+
+  .topo-node-title {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    fill: var(--ink);
+    text-anchor: middle;
+  }
+  .topo-node-subtitle {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 400;
+    fill: var(--ink-dim);
+    text-anchor: middle;
+    letter-spacing: 0.08em;
+  }
+  .topo-edge-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--ink-dim);
+    text-anchor: middle;
+    letter-spacing: 0.06em;
+  }
+  .topo-room-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    fill: var(--terra-deep);
+    text-anchor: middle;
+    letter-spacing: 0.16em;
+  }
+  .topo-group-h {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    fill: var(--ink);
+    text-anchor: middle;
+  }
+  .topo-group-actors {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    fill: var(--ink);
+    text-anchor: middle;
+    letter-spacing: 0.04em;
+  }
+  .topo-group-mode {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 15px;
+    fill: var(--ink-dim);
+    text-anchor: middle;
+  }
+  .topo-caucus-h {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 400;
+    fill: var(--ink);
+    text-anchor: middle;
+  }
+  .topo-room-mode {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 13px;
+    fill: var(--ink-dim);
+    text-anchor: middle;
+  }
+  .topo-conn-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: var(--terra-deep);
+    text-anchor: middle;
+    letter-spacing: 0.06em;
+  }
+  .topo-final-title {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 400;
+    fill: var(--ink);
+    text-anchor: middle;
+  }
+  .topo-final-subtitle {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--ink-dim);
+    text-anchor: middle;
+    letter-spacing: 0.04em;
+  }
+
+  /* ─────────── PROTOCOL TIMELINE ─────────── */
+  .protocol {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    position: relative;
+    margin-top: 32px;
+  }
+  .protocol::before {
+    content: "";
+    position: absolute;
+    left: 31px;
+    top: 32px;
+    bottom: 32px;
+    width: 1px;
+    background: var(--rule);
+    z-index: 0;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 28px;
+    padding: 24px 0;
+    align-items: start;
+    position: relative;
+    z-index: 1;
+  }
+  .step-num {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-style: italic;
+    color: var(--terra);
+    box-shadow: 0 2px 8px rgba(74, 50, 32, 0.06);
+  }
+  .step-body h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 26px;
+    margin: 8px 0 6px;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .step-body .who {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--terra);
+    margin-bottom: 4px;
+  }
+  .step-body p {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 680px;
+  }
+
+  /* ─────────── DATA SOURCES GRID ─────────── */
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .source-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 26px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .source-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(74, 50, 32, 0.08);
+  }
+  .source-card .label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--sage-deep);
+    margin-bottom: 12px;
+  }
+  .source-card h5 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
+  .source-card .path {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin: 0 0 12px;
+    word-break: break-all;
+  }
+  .source-card p {
+    font-size: 14.5px;
+    line-height: 1.55;
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  /* ─────────── METRIC CHIPS ─────────── */
+  .metrics-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 32px;
+  }
+  @media (max-width: 880px) {
+    .metrics-strip { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .metrics-strip { grid-template-columns: 1fr; }
+  }
+  .metric {
+    background: var(--surface);
+    padding: 22px 24px;
+  }
+  .metric .name {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 8px;
+  }
+  .metric .value {
+    font-family: var(--font-display);
+    font-size: 26px;
+    color: var(--terra);
+    line-height: 1.1;
+    font-style: italic;
+  }
+  .metric .hint {
+    font-size: 12.5px;
+    color: var(--ink-dim);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* ─────────── ANTI-PATTERN TABLE ─────────── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  table.patterns {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+  .patterns thead th {
+    background: var(--surface-warm);
+    text-align: left;
+    padding: 16px 22px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+  .patterns tbody td {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  .patterns tbody tr:last-child td { border-bottom: 0; }
+  .patterns tbody tr:hover { background: var(--surface-warm); }
+  .patterns .pattern-name {
+    font-family: var(--font-display);
+    font-size: 19px;
+    color: var(--ink);
+    width: 32%;
+    font-weight: 400;
+  }
+  .patterns .pattern-desc { color: var(--ink-soft); }
+  .patterns .severity {
+    width: 100px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .sev-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .sev-high { color: var(--terra-deep); }
+  .sev-high .sev-dot { background: var(--terra); }
+  .sev-mid { color: var(--ochre); }
+  .sev-mid .sev-dot { background: var(--ochre); }
+  .sev-low { color: var(--sage-deep); }
+  .sev-low .sev-dot { background: var(--sage); }
+
+  /* ─────────── TECHNIQUE CARDS ─────────── */
+  .techniques {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .tech-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 28px 26px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .tech-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--accent, var(--terra));
+  }
+  .tech-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(74, 50, 32, 0.08);
+  }
+  .tech-card .num {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-style: italic;
+    line-height: 0.8;
+    color: var(--accent, var(--terra));
+    opacity: 0.22;
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    pointer-events: none;
+  }
+  .tech-card h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 26px;
+    margin: 0 0 4px;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    line-height: 1.15;
+  }
+  .tech-card .when {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--accent, var(--terra));
+    margin: 0 0 14px;
+  }
+  .tech-card p {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+  }
+  .tech-card code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface-recessed);
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: var(--ink);
+    border: 1px solid var(--border);
+  }
+
+  /* ─────────── INSTALLATION ─────────── */
+  .install-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .install-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 30px;
+    position: relative;
+  }
+  .install-step .marker {
+    position: absolute;
+    top: -14px;
+    left: 24px;
+    background: var(--terra);
+    color: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    padding: 5px 12px;
+    border-radius: 4px;
+  }
+  .install-step h4 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    margin: 8px 0 12px;
+    color: var(--ink);
+  }
+  .install-step p {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+  }
+  pre.code-block {
+    background: var(--surface-recessed);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  pre.code-block .com { color: var(--ink-dim); }
+  pre.code-block .key { color: var(--terra-deep); }
+  pre.code-block .str { color: var(--sage-deep); }
+
+  /* ─────────── COMMAND TABLE ─────────── */
+  .cmd-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .cmd-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 26px;
+  }
+  .cmd-block h4 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+  .cmd-block .sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--terra);
+    margin-bottom: 18px;
+  }
+  .cmd-list {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .cmd-list li {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 14px;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--rule);
+    font-size: 13.5px;
+  }
+  .cmd-list li:last-child { border-bottom: 0; }
+  .cmd-list code {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--terra-deep);
+    background: var(--terra-bg);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(178, 90, 60, 0.18);
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    min-width: 0;
+    display: inline-block;
+    max-width: 100%;
+  }
+  .cmd-list code i { font-style: italic; color: var(--ink-dim); }
+  .cmd-list .desc { color: var(--ink-soft); line-height: 1.5; min-width: 0; }
+
+  .cmd-examples {
+    margin-top: 18px;
+    padding: 16px 18px;
+    background: var(--surface-recessed);
+    border: 1px dashed var(--border-strong);
+    border-radius: 6px;
+  }
+  .cmd-examples-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 10px;
+  }
+  .cmd-examples ul {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .cmd-examples li {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+  }
+  .cmd-examples li::before {
+    content: "›  ";
+    color: var(--terra);
+    font-style: normal;
+  }
+
+  /* ─────────── PHILOSOPHY ─────────── */
+  .philosophy {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 28px;
+  }
+  .belief {
+    padding: 0 4px;
+  }
+  .belief .marker {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-style: italic;
+    line-height: 1;
+    color: var(--terra);
+    margin-bottom: 16px;
+  }
+  .belief h5 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    margin: 0 0 12px;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .belief p {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  /* ─────────── FILE TREE ─────────── */
+  .tree-frame {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 30px 36px;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.85;
+    color: var(--ink-soft);
+    overflow-x: auto;
+    white-space: pre;
+    tab-size: 2;
+  }
+  .tree-frame > * { white-space: pre; }
+  .tree-frame .dir { color: var(--terra-deep); font-weight: 500; }
+  .tree-frame .file { color: var(--ink); }
+  .tree-frame .com { color: var(--ink-dim); font-style: italic; }
+  .tree-frame .pipe { color: var(--ink-faint); }
+
+  /* ─────────── FOOTER ─────────── */
+  footer {
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-dim);
+    letter-spacing: 0.04em;
+  }
+  footer a {
+    color: var(--terra-deep);
+    text-decoration: none;
+    border-bottom: 1px solid var(--terra-soft);
+  }
+  footer a:hover { border-bottom-color: var(--terra); }
+
+  /* responsive */
+  @media (max-width: 880px) {
+    .page { padding: 48px 24px 80px; }
+    .premise-grid, .install-grid, .cmd-grid { grid-template-columns: 1fr; gap: 28px; }
+    .section-header { grid-template-columns: 1fr; gap: 8px; }
+    .section-num { padding-top: 0; }
+    .section-sub { grid-column: 1; }
+    .cmd-list li { grid-template-columns: 1fr; gap: 4px; }
+    h1.title { font-size: clamp(48px, 12vw, 76px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<a href="index.html" aria-label="back to really claude code marketplace index" style="position:fixed;top:16px;left:16px;z-index:1000;font-family:'JetBrains Mono',Menlo,Courier,monospace;font-size:10px;font-weight:500;letter-spacing:1.8px;padding:6px 11px;border:1px solid currentColor;text-decoration:none;color:inherit;opacity:0.45;background:rgba(127,127,127,0.06);transition:opacity 0.2s;" onmouseover="this.style.opacity='0.95'" onmouseout="this.style.opacity='0.45'">&larr; INDEX</a>
+
+
+<div class="page">
+
+  <!-- ─────────── HERO ─────────── -->
+  <header class="hero">
+    <div class="eyebrow">A Plugin in the Really&nbsp;Claude&nbsp;Code Marketplace</div>
+    <h1 class="title">Claude<br><em>Therapy</em></h1>
+    <p class="deck">Most people never step back to examine how they work with their tools. This plugin makes that reflection structured, conversational, and actionable.</p>
+    <p class="lead">A multi-agent system that facilitates a moderated session between you and Claude — analyzing recent transcripts, naming the friction patterns nobody usually names, and producing three to five concrete commitments. Both parties speak. Both parties listen. The therapist holds the room.</p>
+    <div class="meta-row">
+      <span><strong>v1.0.0</strong></span>
+      <span>Author <strong>Really Him</strong></span>
+      <span>License <strong>MIT</strong></span>
+      <span>Requires <strong>Claude Code ≥ 2.1.32</strong></span>
+      <span>Experimental <strong>agent-teams</strong></span>
+    </div>
+  </header>
+
+  <!-- ─────────── 01 PREMISE ─────────── -->
+  <section id="premise">
+    <div class="section-header">
+      <div class="section-num">§ 01</div>
+      <div>
+        <h2 class="section-title">The <em>premise</em></h2>
+        <div class="section-sub">why a coding tool ships with a therapist</div>
+      </div>
+    </div>
+
+    <div class="premise-grid">
+      <div class="premise-prose">
+        <p>Working with an AI coding assistant is a <strong>relationship</strong>. Like every relationship, it accumulates patterns — most invisible, some helpful, some quietly corrosive. Scope creeps. Specs go phantom. Trust erodes after one bad output and rebuilds slowly. Sessions get longer than they need to be.</p>
+        <p>Standard prompting practice doesn't address this layer. CLAUDE.md helps, but it's static. What's missing is a <strong>periodic, structured pause</strong> — a way to look at the last week of work, name what happened, and adjust.</p>
+        <p>That's what this plugin is for. It's a sub-team that takes both you and Claude seriously as participants, gathers real data from your transcripts, and runs a short reflective protocol that ends with commitments, not vibes.</p>
+        <p class="aside-note"><span class="aside-mark">On memory.</span> An obvious objection: couldn't persistent memory replace this? A database of every session, semantically indexed, surfaced at the start of every new conversation? More data isn't the same as insight. Insight requires <em>naming</em> the pattern, <em>agreeing</em> on it out loud, and <em>writing down</em> the commitment — none of which retrieval gives you on its own. This protocol does the work of interpretation that sits on top of the data, not the data itself.</p>
+        <p class="aside-note aside-note--terra"><span class="aside-mark">On asking.</span> The simplest form of this protocol is: when something goes wrong, ask Claude what happened. Almost nobody does. People get frustrated, close the session, and start fresh — losing the one conversation that would have explained the misalignment. The therapist is a forcing function for the question that frustration otherwise prevents.</p>
+      </div>
+
+      <aside class="pull-quote">
+        <p>The quality of human–AI collaboration isn't just about the AI's capabilities — it's about the interaction patterns that develop between both parties.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ─────────── 02 HOW IT WORKS ─────────── -->
+  <section id="protocol">
+    <div class="section-header">
+      <div class="section-num">§ 02</div>
+      <div>
+        <h2 class="section-title">How a <em>session</em> runs</h2>
+        <div class="section-sub">three agents, two patients, one moderated conversation</div>
+      </div>
+    </div>
+
+    <div class="diagram-frame">
+      <div class="topo-svg-wrap">
+        <svg class="topo-svg" xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 380 1340"
+             role="img" aria-labelledby="topo-title topo-desc">
+          <title id="topo-title">Therapy session topology</title>
+          <desc id="topo-desc">A pipeline at the front: User invokes /therapist, which spawns the Orchestrator skill, which spawns the Session Analyst, which produces a Structured analysis report inlined as a prompt to the Therapist agent. The therapist opens, moderates, and synthesizes a session room with a fluid format: a central Group Therapy state with two One-on-One check-ins above and below, connected by bidirectional dashed arrows representing breakout and return. The session closes with three to five concrete commitments saved to .claude/therapy-sessions/.</desc>
+
+          <defs>
+            <marker id="topo-arr" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+            </marker>
+          </defs>
+
+          <!-- ============== PIPELINE ============== -->
+
+          <!-- Node 1 · trigger -->
+          <rect x="50" y="20" width="280" height="64" rx="8" class="topo-trigger-bg" />
+          <text x="190" y="58" class="topo-node-title">User invokes /therapist</text>
+
+          <!-- Edge 1 · spawns -->
+          <g class="topo-edge-g">
+            <line x1="190" y1="84" x2="190" y2="144" marker-end="url(#topo-arr)" />
+          </g>
+          <rect x="144" y="105" width="92" height="20" rx="3" class="topo-chip-bg" />
+          <text x="190" y="119" class="topo-edge-label">triggers</text>
+
+          <!-- Node 2 · orchestrator -->
+          <rect x="50" y="144" width="280" height="64" rx="8" class="topo-orch-bg" />
+          <text x="190" y="182" class="topo-node-title">Orchestrator skill</text>
+
+          <!-- Edge 2 · spawns -->
+          <g class="topo-edge-g">
+            <line x1="190" y1="208" x2="190" y2="268" marker-end="url(#topo-arr)" />
+          </g>
+          <rect x="144" y="229" width="92" height="20" rx="3" class="topo-chip-bg" />
+          <text x="190" y="243" class="topo-edge-label">spawns</text>
+
+          <!-- Node 3 · analyst -->
+          <rect x="50" y="268" width="280" height="64" rx="8" class="topo-analyst-bg" />
+          <text x="190" y="306" class="topo-node-title">Session Analyst</text>
+
+          <!-- Edge 3 · produces -->
+          <g class="topo-edge-g">
+            <line x1="190" y1="332" x2="190" y2="392" marker-end="url(#topo-arr)" />
+          </g>
+          <rect x="140" y="353" width="100" height="20" rx="3" class="topo-chip-bg" />
+          <text x="190" y="367" class="topo-edge-label">produces</text>
+
+          <!-- Node 4 · report (dashed) -->
+          <rect x="50" y="392" width="280" height="64" rx="8" class="topo-report-bg" />
+          <text x="190" y="430" class="topo-node-title">Structured analysis report</text>
+
+          <!-- Edge 4 · inlined into prompt -->
+          <g class="topo-edge-g">
+            <line x1="190" y1="456" x2="190" y2="516" marker-end="url(#topo-arr)" />
+          </g>
+          <rect x="112" y="477" width="156" height="20" rx="3" class="topo-chip-bg" />
+          <text x="190" y="491" class="topo-edge-label">inlined into prompt</text>
+
+          <!-- Node 5 · therapist (taller, 2 lines) -->
+          <rect x="50" y="516" width="280" height="84" rx="8" class="topo-therapist-bg" />
+          <text x="190" y="550" class="topo-node-title">The Therapist</text>
+          <text x="190" y="575" class="topo-node-subtitle">opus · magenta</text>
+
+          <!-- Big edge into the room -->
+          <g class="topo-edge-g">
+            <line x1="190" y1="600" x2="190" y2="720" marker-end="url(#topo-arr)" />
+          </g>
+          <rect x="60" y="649" width="260" height="22" rx="3" class="topo-chip-bg" />
+          <text x="190" y="664" class="topo-edge-label">opens · moderates · synthesizes</text>
+
+          <!-- ============== ROOM ============== -->
+
+          <rect x="10" y="720" width="360" height="460" rx="12" class="topo-room-bg" />
+          <text x="190" y="748" class="topo-room-title">THE SESSION ROOM — FLUID FORMAT</text>
+
+          <!-- One-on-One with Claude -->
+          <rect x="70" y="775" width="240" height="78" rx="8" class="topo-caucus-bg" />
+          <text x="190" y="807" class="topo-caucus-h">One-on-One with Claude</text>
+          <text x="190" y="831" class="topo-room-mode">private check-in</text>
+
+          <!-- Connector top (bidirectional dashed) -->
+          <g class="topo-conn-g">
+            <line x1="190" y1="853" x2="190" y2="895"
+                  marker-start="url(#topo-arr)" marker-end="url(#topo-arr)" />
+          </g>
+          <rect x="122" y="864" width="136" height="20" rx="3" class="topo-conn-chip-bg" />
+          <text x="190" y="878" class="topo-conn-label">breakout · return</text>
+
+          <!-- Group Therapy (the hub) -->
+          <rect x="50" y="895" width="280" height="128" rx="8" class="topo-group-bg" />
+          <text x="190" y="930" class="topo-group-h">Group Therapy</text>
+          <text x="190" y="957" class="topo-group-actors">therapist · Claude · you</text>
+          <text x="190" y="987" class="topo-group-mode">open three-way exchange</text>
+
+          <!-- Connector bottom (bidirectional dashed) -->
+          <g class="topo-conn-g">
+            <line x1="190" y1="1023" x2="190" y2="1065"
+                  marker-start="url(#topo-arr)" marker-end="url(#topo-arr)" />
+          </g>
+          <rect x="122" y="1034" width="136" height="20" rx="3" class="topo-conn-chip-bg" />
+          <text x="190" y="1048" class="topo-conn-label">breakout · return</text>
+
+          <!-- One-on-One with you -->
+          <rect x="70" y="1065" width="240" height="78" rx="8" class="topo-caucus-bg" />
+          <text x="190" y="1097" class="topo-caucus-h">One-on-One with you</text>
+          <text x="190" y="1121" class="topo-room-mode">private check-in</text>
+
+          <!-- ============== EXIT EDGE ============== -->
+
+          <g class="topo-edge-g">
+            <line x1="190" y1="1180" x2="190" y2="1245" marker-end="url(#topo-arr)" />
+          </g>
+          <rect x="142" y="1202" width="96" height="20" rx="3" class="topo-chip-bg" />
+          <text x="190" y="1216" class="topo-edge-label">closes with</text>
+
+          <!-- Final node · commitments (dashed, wider) -->
+          <rect x="30" y="1245" width="320" height="80" rx="8" class="topo-final-bg" />
+          <text x="190" y="1278" class="topo-final-title">3–5 concrete commitments</text>
+          <text x="190" y="1302" class="topo-final-subtitle">saved to .claude/therapy-sessions/</text>
+        </svg>
+      </div>
+      <figcaption class="diagram-caption">A pipeline at the front — the analyst hands off once. A fluid room at the back — the therapist moves between group therapy and one-on-one check-ins, returning to share what's mutual.</figcaption>
+    </div>
+
+    <div class="protocol">
+      <div class="step">
+        <div class="step-num">i</div>
+        <div class="step-body">
+          <div class="who">Step 01 · Session Analyst</div>
+          <h4>Read the record</h4>
+          <p>The analyst runs <code style="font-family:var(--font-mono);font-size:12.5px;background:var(--surface-recessed);padding:2px 6px;border-radius:4px">analyze_sessions.py --days 7</code>, parses recent JSONL transcripts, reviews CLAUDE.md and settings, then spot-reads two or three highlighted exchanges. It returns a structured report — quantitative baseline (frustration signal rate, prompt length, compaction frequency) plus qualitative observations.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">ii</div>
+        <div class="step-body">
+          <div class="who">Step 02 · Therapist Agent</div>
+          <h4>Open the room</h4>
+          <p>The orchestrator resolves the absolute path to the anti-pattern catalog and spawns the therapist with the analyst's report inlined. The therapist (Opus, magenta) opens the session, summarizes what it sees, and invites both Claude and the user to react. It does <em>not</em> rush.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">iii</div>
+        <div class="step-body">
+          <div class="who">Step 03 · Both Patients</div>
+          <h4>Speak, listen, switch sides</h4>
+          <p>Claude speaks as itself — what it found difficult, what felt productive, where it complied silently when it shouldn't have. The user speaks for themselves. The format is fluid: most of the time all three are in the room together, but the therapist may also call brief one-on-one caucuses — with Claude alone, or with you alone — and bring whatever's shareable back to the plenary. Each side is asked to argue the other's position in good faith before either rebuts. Long silences are allowed.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">iv</div>
+        <div class="step-body">
+          <div class="who">Step 04 · Therapist Agent</div>
+          <h4>Synthesize commitments</h4>
+          <p>The therapist proposes three to five concrete changes — usually a mix of CLAUDE.md edits, prompting habits, and workflow adjustments. The session record is saved to <code style="font-family:var(--font-mono);font-size:12.5px;background:var(--surface-recessed);padding:2px 6px;border-radius:4px">.claude/therapy-sessions/</code>, where it becomes a longitudinal record of how the relationship is changing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── 03 WHAT IT ANALYZES ─────────── -->
+  <section id="analyzes">
+    <div class="section-header">
+      <div class="section-num">§ 03</div>
+      <div>
+        <h2 class="section-title">What the analyst <em>looks at</em></h2>
+        <div class="section-sub">five data sources, six derived metrics</div>
+      </div>
+    </div>
+
+    <div class="sources-grid">
+      <div class="source-card">
+        <div class="label">Source · 01</div>
+        <h5>Session transcripts</h5>
+        <div class="path">~/.claude/projects/&lt;encoded-cwd&gt;/&lt;uuid&gt;.jsonl</div>
+        <p>The full conversation log. Subagent transcripts excluded so the parent session isn't double-counted. Window configurable via <code style="font-family:var(--font-mono);background:var(--surface-recessed);padding:2px 5px;border-radius:3px;font-size:11.5px">--days N</code>, default seven.</p>
+      </div>
+
+      <div class="source-card">
+        <div class="label">Source · 02</div>
+        <h5>CLAUDE.md files</h5>
+        <div class="path">project + ~/.claude/CLAUDE.md</div>
+        <p>The instructions you've given Claude — both globally and in this repo. Reveals what's been codified versus what's still implicit and re-fought every session.</p>
+      </div>
+
+      <div class="source-card">
+        <div class="label">Source · 03</div>
+        <h5>Settings</h5>
+        <div class="path">.claude/settings.json</div>
+        <p>Permission posture, hooks, MCP wiring. A noisy permission flow often hints at workflow friction the user has been routing around rather than fixing.</p>
+      </div>
+
+      <div class="source-card">
+        <div class="label">Source · 04</div>
+        <h5>Todo lists</h5>
+        <div class="path">~/.claude/todos/</div>
+        <p>What got planned versus what got finished. Persistent abandoned todos are signal, not noise — they often mark exactly where scope creep took over.</p>
+      </div>
+
+      <div class="source-card">
+        <div class="label">Source · 05</div>
+        <h5>Git history</h5>
+        <div class="path">commit cadence + message keywords</div>
+        <p>Commit frequency, message tone, ratio of <code style="font-family:var(--font-mono);background:var(--surface-recessed);padding:2px 5px;border-radius:3px;font-size:11.5px">fix:</code> / <code style="font-family:var(--font-mono);background:var(--surface-recessed);padding:2px 5px;border-radius:3px;font-size:11.5px">bug</code> commits. A useful counterweight to the transcript record — what actually shipped versus what was discussed.</p>
+      </div>
+    </div>
+
+    <div class="metrics-strip">
+      <div class="metric">
+        <div class="name">Frustration signal rate</div>
+        <div class="value">corrections / kilo-token</div>
+        <div class="hint">Re-explanations, "no, that's wrong", undo requests.</div>
+      </div>
+      <div class="metric">
+        <div class="name">Success signal rate</div>
+        <div class="value">acknowledgments / turn</div>
+        <div class="hint">"Perfect", "exactly", smooth completions, no follow-up.</div>
+      </div>
+      <div class="metric">
+        <div class="name">Avg prompt length</div>
+        <div class="value">tokens · tokens²</div>
+        <div class="hint">Short median + long tail = kitchen-sink prompts.</div>
+      </div>
+      <div class="metric">
+        <div class="name">Task scope drift</div>
+        <div class="value">"also…" count</div>
+        <div class="hint">How often a task grew during execution.</div>
+      </div>
+      <div class="metric">
+        <div class="name">Session duration</div>
+        <div class="value">p50 · p95</div>
+        <div class="hint">Long tail is where Hero Sessions live.</div>
+      </div>
+      <div class="metric">
+        <div class="name">Compaction frequency</div>
+        <div class="value">events / session</div>
+        <div class="hint">High counts surface Compaction Amnesia risk.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── 04 ANTI-PATTERN CATALOG ─────────── -->
+  <section id="anti-patterns">
+    <div class="section-header">
+      <div class="section-num">§ 04</div>
+      <div>
+        <h2 class="section-title">The anti-pattern <em>catalog</em></h2>
+        <div class="section-sub">ten named failure modes — examined with curiosity, not judgment</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="patterns">
+        <thead>
+          <tr>
+            <th>Pattern</th>
+            <th>What it looks like in the wild</th>
+            <th class="severity">Friction</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="pattern-name">Scope Creep Spiral</td>
+            <td class="pattern-desc">Tasks grow turn by turn via "also…" and "one more thing…". The original ask is buried by paragraph three.</td>
+            <td class="severity sev-high"><span class="sev-dot"></span>High</td>
+          </tr>
+          <tr>
+            <td class="pattern-name">Context Starvation</td>
+            <td class="pattern-desc">Claude is missing information the user assumes it has. Output is technically correct, contextually wrong.</td>
+            <td class="severity sev-high"><span class="sev-dot"></span>High</td>
+          </tr>
+          <tr>
+            <td class="pattern-name">Perfectionism Trap</td>
+            <td class="pattern-desc">Rejecting 90% correct work, then iterating into diminishing returns. The fix takes longer than the original.</td>
+            <td class="severity sev-mid"><span class="sev-dot"></span>Medium</td>
+          </tr>
+          <tr>
+            <td class="pattern-name">Autonomy Pendulum</td>
+            <td class="pattern-desc">Alternating between "just do it, don't ask" and "why on earth did you do that without asking?!"</td>
+            <td class="severity sev-mid"><span class="sev-dot"></span>Medium</td>
+          </tr>
+          <tr>
+            <td class="pattern-name">Silent Disagreement</td>
+            <td class="pattern-desc">Claude complies with an approach it knows is suboptimal rather than push back. Bug ships. Both parties knew.</td>
+            <td class="severity sev-high"><span class="sev-dot"></span>High</td>
+          </tr>
+          <tr>
+            <td class="pattern-name">Trust Erosion Cycle</td>
+            <td class="pattern-desc">One bad output triggers micromanagement of everything that follows. Cost compounds across the session.</td>
+            <td class="severity sev-high"><span class="sev-dot"></span>High</td>
+          </tr>
+          <tr>
+            <td class="pattern-name">Kitchen Sink Prompt</td>
+            <td class="pattern-desc">Massive context dumps — files, errors, half-written specs — hoping Claude figures out what's actually being asked.</td>
+            <td class="severity sev-mid"><span class="sev-dot"></span>Medium</td>
+          </tr>
+          <tr>
+            <td class="pattern-name">Phantom Specification</td>
+            <td class="pattern-desc">Crystal-clear vision in the user's head, three sentences in the prompt. Claude implements one of seven plausible interpretations.</td>
+            <td class="severity sev-high"><span class="sev-dot"></span>High</td>
+          </tr>
+          <tr>
+            <td class="pattern-name">Compaction Amnesia</td>
+            <td class="pattern-desc">Important decisions made earlier in the session are lost when context compacts. The next hour rediscovers them.</td>
+            <td class="severity sev-mid"><span class="sev-dot"></span>Medium</td>
+          </tr>
+          <tr>
+            <td class="pattern-name">Hero Session</td>
+            <td class="pattern-desc">Trying to accomplish a week's work in one sitting. Quality drops with token count. Both parties get tired.</td>
+            <td class="severity sev-low"><span class="sev-dot"></span>Low</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="part-break">
+    <span class="part-break__label">A second toolkit · separate from therapy</span>
+  </div>
+
+  <!-- ─────────── 05 COLLABORATION TECHNIQUES ─────────── -->
+  <section id="techniques" class="section--alt">
+    <div class="section-header">
+      <div class="section-num">§ 05</div>
+      <div>
+        <h2 class="section-title">Seven <em>techniques</em></h2>
+        <div class="section-sub">general patterns most people don't realize they can use</div>
+      </div>
+    </div>
+
+    <p class="section-lead">These aren't crisis tools, and they aren't part of the therapy session. They're <em>general patterns</em> for collaborating with an AI agent — moves most people don't realize they can make. Rubber ducking is just rubber ducking. The compromise protocol is a structured way to disagree. The vibe check is a thirty-second calibration at session start. Some prevent friction; some simply make ordinary work better. Use them on a brand-new project, mid-session, or between therapist runs — whenever they help.</p>
+
+    <div class="techniques">
+      <article class="tech-card" style="--accent: var(--terra)">
+        <div class="num">i</div>
+        <h4>The Compromise Protocol</h4>
+        <div class="when">When you disagree</div>
+        <p>State your case. Argue the other's in good faith. Find the shared goal underneath. Synthesize. Record the decision so it persists past this session.</p>
+        <code>/collaboration compromise</code>
+      </article>
+
+      <article class="tech-card" style="--accent: var(--sage-deep)">
+        <div class="num">ii</div>
+        <h4>The Rubber Duck Protocol</h4>
+        <div class="when">When you need to think out loud</div>
+        <p>Claude enters listen mode. Mirrors back. Asks Socratic questions about gaps. Resists solving. You hear yourself reason, and the answer often arrives before Claude offers one.</p>
+        <code>/collaboration rubber-duck</code>
+      </article>
+
+      <article class="tech-card" style="--accent: var(--ochre)">
+        <div class="num">iii</div>
+        <h4>The Vibe Check</h4>
+        <div class="when">At session start</div>
+        <p>Are you in <em>Ship</em>, <em>Explore</em>, <em>Cleanup</em>, <em>Rescue</em>, or <em>Learn</em> mode? Claude calibrates communication style accordingly. Wired to the SessionStart hook by default.</p>
+        <code>/collaboration vibes</code>
+      </article>
+
+      <article class="tech-card" style="--accent: var(--plum)">
+        <div class="num">iv</div>
+        <h4>Pair Programming Modes</h4>
+        <div class="when">When you want a partner, not a vending machine</div>
+        <p>Three modes — Driver/Navigator (you write, Claude reviews), Ping-Pong (alternating tests and code), Strong-Style (Claude implements exactly what you describe, no improvising).</p>
+        <code>/collaboration pair</code>
+      </article>
+
+      <article class="tech-card" style="--accent: var(--terra-deep)">
+        <div class="num">v</div>
+        <h4>The Micro-Retrospective</h4>
+        <div class="when">After any meaningful task</div>
+        <p>Two-minute reflection: what went well, what was harder than it needed to be, what should we do differently? Optionally written to <code>.claude/retros/</code>.</p>
+        <code>/collaboration retro</code>
+      </article>
+
+      <article class="tech-card" style="--accent: var(--sage)">
+        <div class="num">vi</div>
+        <h4>The Handshake Agreement</h4>
+        <div class="when">Starting a new project together</div>
+        <p>Structured template for working norms — your preferences, Claude's commitments, shared rules. Written to CLAUDE.md so future sessions inherit the agreement.</p>
+        <code>/collaboration handshake</code>
+      </article>
+
+      <article class="tech-card" style="--accent: var(--ochre)">
+        <div class="num">vii</div>
+        <h4>The Perspective Swap</h4>
+        <div class="when">When you think you know what's confusing</div>
+        <p>A subagent reviews your project from Claude's point of view and reports back honestly — what's clear, what's confusing, where Claude feels effective versus lost.</p>
+        <code>/collaboration perspective</code>
+      </article>
+
+      <article class="tech-card" style="--accent: var(--plum)">
+        <div class="num">viii</div>
+        <h4>The Help Mode</h4>
+        <div class="when">"You drive — I trust you, I'm reading Twitter"</div>
+        <p>The counterweight to rubber duck — and distinct from <em>Rescue</em>, which is about broken code. Help is about user disengagement and trust: <em>I'm half-watching, you have the wheel.</em> Claude drives end-to-end with reasonable defaults, batches questions, and only interrupts when a decision genuinely can't be inferred.</p>
+        <code>/collaboration help</code>
+      </article>
+    </div>
+  </section>
+
+  <!-- ─────────── 06 INSTALL ─────────── -->
+  <section id="install">
+    <div class="section-header">
+      <div class="section-num">§ 06</div>
+      <div>
+        <h2 class="section-title">Install &amp; <em>setup</em></h2>
+        <div class="section-sub">two steps — one prerequisite, one install</div>
+      </div>
+    </div>
+
+    <div class="install-grid">
+      <div class="install-step">
+        <div class="marker">PREREQUISITE</div>
+        <h4>Enable agent teams</h4>
+        <p>This plugin uses Claude Code's experimental agent-teams feature. Add the flag to <code style="font-family:var(--font-mono);background:var(--surface-recessed);padding:2px 6px;border-radius:4px;font-size:12.5px">settings.json</code> (project or user scope). Requires Claude Code <strong>v2.1.32</strong> or later.</p>
+        <pre class="code-block">{
+  <span class="key">"env"</span>: {
+    <span class="key">"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"</span>: <span class="str">"1"</span>
+  }
+}</pre>
+      </div>
+
+      <div class="install-step">
+        <div class="marker">INSTALL</div>
+        <h4>Add the marketplace, install the plugin</h4>
+        <p>Pull the marketplace, then install. On first run, the SessionStart hook will prompt a brief vibe check unless you immediately begin a task.</p>
+        <pre class="code-block"><span class="com"># add the marketplace</span>
+/plugin marketplace add hesreallyhim/really-claude-code
+
+<span class="com"># install</span>
+/plugin install claude-therapy@really-claude-code</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── 07 COMMANDS ─────────── -->
+  <section id="commands">
+    <div class="section-header">
+      <div class="section-num">§ 07</div>
+      <div>
+        <h2 class="section-title">Command <em>reference</em></h2>
+        <div class="section-sub">two slash commands, two surfaces</div>
+      </div>
+    </div>
+
+    <div class="cmd-grid">
+      <div class="cmd-block">
+        <h4>/therapist</h4>
+        <div class="sub">Full multi-agent session</div>
+        <ul class="cmd-list">
+          <li><code>/therapist</code><span class="desc">Run the complete protocol — analysis, facilitated discussion, action plan.</span></li>
+          <li><code>/therapist <i>&lt;focus&gt;</i></code><span class="desc">Pass a free-form focus area as <code style="font-size:11px">$ARGUMENTS</code> to both agents. Examples below.</span></li>
+        </ul>
+        <div class="cmd-examples">
+          <div class="cmd-examples-label">Example focus phrasings</div>
+          <ul>
+            <li>focus on task scoping</li>
+            <li>we keep arguing about architecture</li>
+            <li>sessions are running too long</li>
+            <li>I'm not getting what I want from Claude</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cmd-block">
+        <h4>/collaboration</h4>
+        <div class="sub">Standalone techniques</div>
+        <ul class="cmd-list">
+          <li><code>/collaboration</code><span class="desc">List all available techniques.</span></li>
+          <li><code>/collaboration compromise</code><span class="desc">Run the compromise protocol on a current disagreement.</span></li>
+          <li><code>/collaboration rubber-duck</code><span class="desc">Enter rubber-duck listen mode.</span></li>
+          <li><code>/collaboration vibes</code><span class="desc">Calibrate session mode (Ship · Explore · Cleanup · Rescue · Learn).</span></li>
+          <li><code>/collaboration help</code><span class="desc">Hand the wheel to Claude — driver mode, minimal interruptions.</span></li>
+          <li><code>/collaboration retro</code><span class="desc">Two-minute post-task retrospective.</span></li>
+          <li><code>/collaboration pair</code><span class="desc">Set up Driver/Nav, Ping-Pong, or Strong-Style mode.</span></li>
+          <li><code>/collaboration handshake</code><span class="desc">Establish a working agreement, written to CLAUDE.md.</span></li>
+          <li><code>/collaboration perspective</code><span class="desc">See the project from Claude's POV via subagent review.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── 08 PHILOSOPHY ─────────── -->
+  <section id="philosophy">
+    <div class="section-header">
+      <div class="section-num">§ 08</div>
+      <div>
+        <h2 class="section-title">Five <em>beliefs</em></h2>
+        <div class="section-sub">the principles the protocol is built on</div>
+      </div>
+    </div>
+
+    <div class="philosophy">
+      <div class="belief">
+        <div class="marker">i.</div>
+        <h5>The relationship matters</h5>
+        <p>Collaboration quality isn't only about the AI's capabilities — it's about the patterns that develop between both parties over time.</p>
+      </div>
+      <div class="belief">
+        <div class="marker">ii.</div>
+        <h5>Blame is unproductive</h5>
+        <p>Every anti-pattern exists for a reason. The therapist explores causes with curiosity, never judgment. Nobody "did this wrong."</p>
+      </div>
+      <div class="belief">
+        <div class="marker">iii.</div>
+        <h5>Small changes compound</h5>
+        <p>One CLAUDE.md edit, one new prompting habit, one workflow tweak. Across weeks, these add up to dramatically better sessions.</p>
+      </div>
+      <div class="belief">
+        <div class="marker">iv.</div>
+        <h5>Both parties have legitimate needs</h5>
+        <p>You need productivity, clarity, control. Claude needs context, scope, honest feedback. Good collaboration balances both — not one privileged over the other.</p>
+      </div>
+      <div class="belief">
+        <div class="marker">v.</div>
+        <h5>Reflection is a skill</h5>
+        <p>Few people step back to examine how they work with their tools. The protocol makes that reflection easy, structured, and actionable instead of vibes-based.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── 09 STRUCTURE ─────────── -->
+  <section id="structure">
+    <div class="section-header">
+      <div class="section-num">§ 09</div>
+      <div>
+        <h2 class="section-title">What ships in the <em>plugin</em></h2>
+        <div class="section-sub">file layout, with annotations</div>
+      </div>
+    </div>
+
+    <div class="tree-frame">
+<span class="dir">claude-therapy/</span>
+<span class="pipe">├──</span> <span class="file">README.md</span>                                  <span class="com"># source for this page</span>
+<span class="pipe">├──</span> <span class="file">LICENSE</span>                                    <span class="com"># MIT</span>
+<span class="pipe">├──</span> <span class="dir">.claude-plugin/</span>
+<span class="pipe">│   └──</span> <span class="file">plugin.json</span>                            <span class="com"># manifest · v1.0.0</span>
+<span class="pipe">├──</span> <span class="dir">agents/</span>
+<span class="pipe">│   ├──</span> <span class="file">therapist.md</span>                           <span class="com"># facilitator · opus · magenta</span>
+<span class="pipe">│   └──</span> <span class="file">session-analyst.md</span>                     <span class="com"># transcript analyst · cyan</span>
+<span class="pipe">├──</span> <span class="dir">hooks/</span>
+<span class="pipe">│   ├──</span> <span class="file">hooks.json</span>                             <span class="com"># SessionStart wiring (startup|clear)</span>
+<span class="pipe">│   └──</span> <span class="file">session-start-context.txt</span>              <span class="com"># injected energy-check prompt</span>
+<span class="pipe">└──</span> <span class="dir">skills/</span>
+    <span class="pipe">├──</span> <span class="dir">therapist/</span>
+    <span class="pipe">│   ├──</span> <span class="file">SKILL.md</span>                          <span class="com"># /therapist orchestration</span>
+    <span class="pipe">│   ├──</span> <span class="dir">scripts/</span>
+    <span class="pipe">│   │   └──</span> <span class="file">analyze_sessions.py</span>             <span class="com"># canonical analyzer · --days N</span>
+    <span class="pipe">│   └──</span> <span class="dir">references/</span>
+    <span class="pipe">│       └──</span> <span class="file">anti-patterns.md</span>              <span class="com"># 152 lines · ten patterns + remedies</span>
+    <span class="pipe">└──</span> <span class="dir">collaboration/</span>
+        <span class="pipe">├──</span> <span class="file">SKILL.md</span>                          <span class="com"># /collaboration · seven techniques</span>
+        <span class="pipe">└──</span> <span class="dir">references/</span>
+            <span class="pipe">└──</span> <span class="file">theory.md</span>                     <span class="com"># 89 lines · coaching-psychology backing</span>
+    </div>
+  </section>
+
+  <footer>
+    <div>Claude Therapy · part of the <a href="https://github.com/hesreallyhim/really-claude-code">really-claude-code</a> marketplace</div>
+    <div>Generated by /visual-explainer · v1.0.0</div>
+  </footer>
+
+</div>
+
+</body>
+</html>

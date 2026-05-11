@@ -88,9 +88,7 @@ When the scenario does not match the quick reference table above, use this trait
 | Documenter | Creates/maintains documentation | document-maintainer |
 | Releaser | Packages, versions, ships | release-manager |
 
-**Full mapping:** See `references/agent-archetype-mapping.md` for complete agent-to-archetype table with pattern-specific assignments.
-
-**Inventory:** Run `scripts/scan-agents.sh` to list all currently installed agents.
+**Full mapping:** See `references/agent-archetype-mapping.md` for the complete archetype table — illustrative, for understanding what kinds of roles exist. The team-architect uses these archetypes to *describe* roles in its design, not to assign specific installed agents (matching to installed agents is the agent-explorer's role, downstream).
 
 ## Communication Topology Reference
 
@@ -116,7 +114,7 @@ Drill into these files only when you need full research for a specific category:
 | `references/organizational-theory.md` | Conway's Law, Brooks's Law, Tuckman, Ringelmann, Communication Overhead | Justifying team size and structure decisions |
 | `references/scenario-playbooks.md` | Complete playbooks for all 10 scenarios | When the quick reference table matches a scenario |
 | `references/topology-diagrams.md` | ASCII diagrams for all 6 topologies with formulas | Including diagrams in team design output |
-| `references/agent-archetype-mapping.md` | Maps archetypes to installed agents, pattern-specific assignments | Assigning real agents to team roles |
+| `references/agent-archetype-mapping.md` | Catalog of archetypes with example agents (illustrative) | Understanding the archetype vocabulary used in role design |
 | `references/sources.md` | 97 source URLs, categorized | Attribution, further reading |
 
 ## Example Team Designs

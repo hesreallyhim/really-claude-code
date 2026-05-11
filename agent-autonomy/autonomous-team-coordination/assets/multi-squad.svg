@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 580" role="img" aria-labelledby="msTitle msDesc">
+  <title id="msTitle">Multi-squad architecture</title>
+  <desc id="msDesc">Hierarchical chart showing the team-lead at top, two squad-leaders below (backend and frontend), and three workers under each squad-leader, rendered as a paper formation chart.</desc>
+
+  <defs>
+    <filter id="paperShadow3" x="-2%" y="-2%" width="104%" height="106%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="3" dy="5" result="o"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="ruledLines3" x="0" y="0" width="40" height="22" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="22" x2="40" y2="22" stroke="#bda671" stroke-width="0.5" opacity="0.22"/>
+    </pattern>
+    <pattern id="paperGrain3" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
+      <rect width="2" height="2" fill="#f5ecd0"/>
+      <rect x="0" y="0" width="1" height="1" fill="#efe3bd" opacity="0.35"/>
+    </pattern>
+  </defs>
+
+  <rect width="880" height="580" fill="none"/>
+
+  <!-- Paper sheet -->
+  <g filter="url(#paperShadow3)">
+    <rect x="40" y="32" width="800" height="516" fill="url(#paperGrain3)"/>
+    <rect x="40" y="32" width="800" height="516" fill="url(#ruledLines3)"/>
+  </g>
+
+  <!-- Header banner -->
+  <rect x="40" y="32" width="800" height="58" fill="#1a1a2e"/>
+  <line x1="40" y1="90" x2="840" y2="90" stroke="#00ffff" stroke-width="2"/>
+  <line x1="40" y1="95" x2="840" y2="95" stroke="#00ffff" stroke-width="0.7" opacity="0.5"/>
+  <text x="64" y="56" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#00ffff" letter-spacing="3">FORM RCC-003 :: MULTI-SQUAD FORMATION</text>
+  <text x="64" y="78" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="22" font-weight="700" fill="#f5ecd0" letter-spacing="5">PARALLEL WORKSTREAMS</text>
+  <text x="816" y="56" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#aab" text-anchor="end" letter-spacing="1.5">2 squads · 6 workers</text>
+  <text x="816" y="78" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#00ffff" text-anchor="end" letter-spacing="2">CONTEXT-ISOLATED</text>
+
+  <!-- ====== TEAM-LEAD (top center) ====== -->
+  <g transform="translate(360, 116)">
+    <rect x="0" y="0" width="160" height="60" fill="#fdf6df" stroke="#1a1a2e" stroke-width="1.5"/>
+    <rect x="0" y="0" width="160" height="20" fill="#1a1a2e"/>
+    <text x="80" y="14" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#00ffff" text-anchor="middle" letter-spacing="3">QUEEN BEE</text>
+    <text x="80" y="40" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="13" font-weight="700" fill="#1f2937" text-anchor="middle" letter-spacing="2">TEAM-LEAD</text>
+    <text x="80" y="54" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" text-anchor="middle" letter-spacing="1">spawn requests + reports</text>
+  </g>
+
+  <!-- spawn lines from team-lead to squad-leaders -->
+  <g stroke="#1a1a2e" stroke-width="1.2" fill="none">
+    <path d="M 440 178 L 440 200 L 240 200 L 240 224" stroke-dasharray="4 4"/>
+    <path d="M 440 178 L 440 200 L 640 200 L 640 224" stroke-dasharray="4 4"/>
+    <text x="296" y="195" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" text-anchor="middle" letter-spacing="1.5">spawn</text>
+    <text x="584" y="195" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" text-anchor="middle" letter-spacing="1.5">spawn</text>
+  </g>
+
+  <!-- ====== SQUAD-LEADER LEFT (backend) ====== -->
+  <g transform="translate(140, 224)">
+    <rect x="0" y="0" width="200" height="64" fill="#fdf6df" stroke="#1a1a2e" stroke-width="1.5"/>
+    <rect x="0" y="0" width="200" height="20" fill="#1a1a2e"/>
+    <text x="100" y="14" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#00ffff" text-anchor="middle" letter-spacing="3">SQUAD · BACKEND</text>
+    <text x="100" y="40" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="13" font-weight="700" fill="#1f2937" text-anchor="middle" letter-spacing="2">SQUAD-LEADER</text>
+    <text x="100" y="56" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" text-anchor="middle" letter-spacing="1">coordinates 3 workers</text>
+  </g>
+
+  <!-- ====== SQUAD-LEADER RIGHT (frontend) ====== -->
+  <g transform="translate(540, 224)">
+    <rect x="0" y="0" width="200" height="64" fill="#fdf6df" stroke="#1a1a2e" stroke-width="1.5"/>
+    <rect x="0" y="0" width="200" height="20" fill="#1a1a2e"/>
+    <text x="100" y="14" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="10" fill="#00ffff" text-anchor="middle" letter-spacing="3">SQUAD · FRONTEND</text>
+    <text x="100" y="40" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="13" font-weight="700" fill="#1f2937" text-anchor="middle" letter-spacing="2">SQUAD-LEADER</text>
+    <text x="100" y="56" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" text-anchor="middle" letter-spacing="1">coordinates 3 workers</text>
+  </g>
+
+  <!-- coordination lines from each SL to its workers -->
+  <g stroke="#1a1a2e" stroke-width="1" fill="none" opacity="0.85">
+    <!-- left squad -->
+    <path d="M 240 290 L 240 314 L 168 314 L 168 348"/>
+    <path d="M 240 290 L 240 348"/>
+    <path d="M 240 290 L 240 314 L 312 314 L 312 348"/>
+    <!-- right squad -->
+    <path d="M 640 290 L 640 314 L 568 314 L 568 348"/>
+    <path d="M 640 290 L 640 348"/>
+    <path d="M 640 290 L 640 314 L 712 314 L 712 348"/>
+  </g>
+
+  <!-- ====== Workers (left squad) ====== -->
+  <g font-family="JetBrains Mono, Menlo, Courier, monospace" fill="#1f2937">
+    <g transform="translate(108, 348)">
+      <rect width="120" height="56" fill="#fdf6df" stroke="#1a1a2e" stroke-width="1"/>
+      <text x="60" y="20" font-size="10" font-weight="700" fill="#1f2937" text-anchor="middle" letter-spacing="2">API ENG</text>
+      <text x="60" y="36" font-size="9" fill="#7a6c44" text-anchor="middle">endpoints,</text>
+      <text x="60" y="48" font-size="9" fill="#7a6c44" text-anchor="middle">middleware</text>
+    </g>
+    <g transform="translate(252, 348)">
+      <rect width="120" height="56" fill="#fdf6df" stroke="#1a1a2e" stroke-width="1"/>
+      <text x="60" y="20" font-size="10" font-weight="700" fill="#1f2937" text-anchor="middle" letter-spacing="2">DATA ENG</text>
+      <text x="60" y="36" font-size="9" fill="#7a6c44" text-anchor="middle">schema,</text>
+      <text x="60" y="48" font-size="9" fill="#7a6c44" text-anchor="middle">migrations</text>
+    </g>
+    <g transform="translate(108, 414)">
+      <rect width="264" height="40" fill="#fdf6df" stroke="#1a1a2e" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="132" y="18" font-size="10" font-weight="700" fill="#1f2937" text-anchor="middle" letter-spacing="2">REVIEW GATE</text>
+      <text x="132" y="32" font-size="9" fill="#7a6c44" text-anchor="middle">code review · integration check</text>
+    </g>
+  </g>
+
+  <!-- ====== Workers (right squad) ====== -->
+  <g font-family="JetBrains Mono, Menlo, Courier, monospace" fill="#1f2937">
+    <g transform="translate(508, 348)">
+      <rect width="120" height="56" fill="#fdf6df" stroke="#1a1a2e" stroke-width="1"/>
+      <text x="60" y="20" font-size="10" font-weight="700" fill="#1f2937" text-anchor="middle" letter-spacing="2">UI ENG</text>
+      <text x="60" y="36" font-size="9" fill="#7a6c44" text-anchor="middle">components,</text>
+      <text x="60" y="48" font-size="9" fill="#7a6c44" text-anchor="middle">routing</text>
+    </g>
+    <g transform="translate(652, 348)">
+      <rect width="120" height="56" fill="#fdf6df" stroke="#1a1a2e" stroke-width="1"/>
+      <text x="60" y="20" font-size="10" font-weight="700" fill="#1f2937" text-anchor="middle" letter-spacing="2">STATE ENG</text>
+      <text x="60" y="36" font-size="9" fill="#7a6c44" text-anchor="middle">stores,</text>
+      <text x="60" y="48" font-size="9" fill="#7a6c44" text-anchor="middle">data fetching</text>
+    </g>
+    <g transform="translate(508, 414)">
+      <rect width="264" height="40" fill="#fdf6df" stroke="#1a1a2e" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="132" y="18" font-size="10" font-weight="700" fill="#1f2937" text-anchor="middle" letter-spacing="2">REVIEW GATE</text>
+      <text x="132" y="32" font-size="9" fill="#7a6c44" text-anchor="middle">UX review · accessibility check</text>
+    </g>
+  </g>
+
+  <!-- Cross-team comm note (bottom) -->
+  <g transform="translate(60, 484)">
+    <line x1="0" y1="0" x2="760" y2="0" stroke="#1a1a2e" stroke-width="0.6" opacity="0.6" stroke-dasharray="2 2"/>
+    <text x="0" y="20" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" letter-spacing="2">CROSS-SQUAD COMM</text>
+    <text x="180" y="20" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#1f2937">routes through <tspan font-weight="700">team-lead</tspan>, never directly between squads</text>
+    <text x="0" y="42" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="9" fill="#7a6c44" letter-spacing="2">LEADERSHIP ROTATION</text>
+    <text x="180" y="42" font-family="JetBrains Mono, Menlo, Courier, monospace" font-size="11" fill="#1f2937">any agent can be promoted to squad-leader mid-session</text>
+  </g>
+</svg>

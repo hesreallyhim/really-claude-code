@@ -1,7 +1,7 @@
 {
   "name": "autonomous-team-coordination",
-  "description": "Enables delegated, context-efficient multi-agent team management through autonomous coordination. Provides a trio pattern (squad-leader + team-architect + skill-identifier) for designing and coordinating sub-teams, an announcer agent for multi-recipient message relay, a pub-sub-relayer agent for topic-based message routing via file-backed channel subscriptions, /squad, /announce, and /publish slash commands, cross-boundary message warning hooks, and squad roster management.",
-  "version": "0.0.1",
+  "description": "A full-fledged Claude Code multi-team orchestration pattern that uses only the native agent teams feature - by decoupling the role of agent-as-leader and agent-as-spawner, a wide range of undocumented capacities for complex layered teams are unlocked",
+  "version": "1.0.0",
   "author": {
     "name": "Really Him",
     "url": "https://github.com/hesreallyhim"
@@ -13,7 +13,7 @@
     "team-coordination",
     "agent-autonomy",
     "squad",
-    "announce",
-    "agent-orchestration"
+    "agent-orchestration",
+    "agent-teams"
   ]
 }

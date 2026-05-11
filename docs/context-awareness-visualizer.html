@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>context-awareness — really claude code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --bg-deep: #131325;
+    --paper: #1f1f3a;
+    --surface: #232344;
+    --surface-recessed: #161629;
+    --ink: #e0e0e0;
+    --ink-soft: #c8c8d4;
+    --ink-dim: #8888a0;
+    --ink-faint: #666680;
+    --rule: rgba(0, 255, 255, 0.12);
+    --rule-bold: rgba(0, 255, 255, 0.4);
+    --accent: #00FFFF;
+    --accent-deep: #00b8b8;
+    --accent-bg: rgba(0, 255, 255, 0.06);
+    --accent-soft: rgba(0, 255, 255, 0.18);
+    --warn: #FFB000;
+    --warn-bg: rgba(255, 176, 0, 0.08);
+    --danger: #FF4444;
+    --danger-bg: rgba(255, 68, 68, 0.08);
+    --safe: #00FF88;
+    --safe-bg: rgba(0, 255, 136, 0.07);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f5f5f0;
+      --bg-deep: #ebebe4;
+      --paper: #ffffff;
+      --surface: #fafaf4;
+      --surface-recessed: #eceae0;
+      --ink: #1a1a2e;
+      --ink-soft: #2a2a44;
+      --ink-dim: #5a5a70;
+      --ink-faint: #8888a0;
+      --rule: rgba(0, 100, 110, 0.18);
+      --rule-bold: rgba(0, 100, 110, 0.5);
+      --accent: #008080;
+      --accent-deep: #005f5f;
+      --accent-bg: rgba(0, 128, 128, 0.06);
+      --accent-soft: rgba(0, 128, 128, 0.18);
+      --warn: #b87800;
+      --warn-bg: rgba(184, 120, 0, 0.08);
+      --danger: #c41e3a;
+      --danger-bg: rgba(196, 30, 58, 0.08);
+      --safe: #007a3d;
+      --safe-bg: rgba(0, 122, 61, 0.07);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 14px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    /* subtle scanline overlay — V5 Datasheet signature */
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(0, 255, 255, 0.012) 2px,
+      rgba(0, 255, 255, 0.012) 3px
+    );
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  @media (prefers-color-scheme: light) {
+    body {
+      background-image: none;
+    }
+  }
+
+  article {
+    max-width: 580px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+
+  /* ========== MEMO HEADER ========== */
+  .memo {
+    border: 1px solid var(--rule-bold);
+    padding: 14px 16px;
+    margin-bottom: 48px;
+    font-size: 11px;
+    line-height: 1.7;
+    background: var(--surface-recessed);
+  }
+  .memo dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    column-gap: 16px;
+    row-gap: 4px;
+  }
+  .memo dt {
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+  .memo dd {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+  .memo dd .accent { color: var(--accent); }
+
+  /* ========== HERO ========== */
+  .hero {
+    margin-bottom: 56px;
+  }
+  .hero .mark {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+  }
+  .hero h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 1.15;
+    margin: 0 0 20px;
+    letter-spacing: -0.02em;
+  }
+  .hero .tagline {
+    font-size: 13px;
+    color: var(--ink-dim);
+    border-left: 2px solid var(--accent);
+    padding-left: 12px;
+    margin: 0 0 24px;
+    line-height: 1.6;
+  }
+  .hero .lede {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .hero em {
+    font-style: normal;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 0 3px;
+  }
+
+  /* ========== SECTIONS ========== */
+  section {
+    margin-bottom: 56px;
+  }
+  section h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.3;
+    margin: 0 0 6px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  section h2 .num {
+    color: var(--ink-faint);
+    font-weight: 400;
+    margin-right: 10px;
+  }
+  section h2 .num .br { color: var(--ink-faint); }
+  section h2 .num .digits { color: var(--accent); }
+  section .kicker {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin: 0 0 24px;
+    padding-left: calc(2ch + 1.5ch + 10px);
+  }
+  section p {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin: 0 0 16px;
+  }
+  section p em {
+    font-style: normal;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  section p code,
+  section li code {
+    font-family: inherit;
+    font-size: 0.92em;
+    background: var(--accent-bg);
+    color: var(--accent);
+    padding: 1px 5px;
+    border: 1px solid var(--accent-soft);
+  }
+
+  h3 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-dim);
+    margin: 32px 0 12px;
+  }
+
+  ul, ol {
+    padding-left: 18px;
+    margin: 0 0 16px;
+  }
+  li {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  li::marker { color: var(--ink-faint); }
+
+  /* ========== CODE / SAMPLE BLOCKS ========== */
+  pre.sample {
+    background: var(--surface-recessed);
+    border: 1px solid var(--rule);
+    border-left: 2px solid var(--accent);
+    padding: 14px 16px;
+    margin: 16px 0;
+    font-family: inherit;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  pre.sample .br { color: var(--ink-faint); }
+  pre.sample .key { color: var(--accent); }
+  pre.sample .turn { color: var(--ink-faint); }
+
+  .sample-stack {
+    display: grid;
+    gap: 8px;
+    margin: 18px 0 24px;
+  }
+  .sample-row {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    align-items: stretch;
+    border: 1px solid var(--rule);
+    background: var(--surface-recessed);
+  }
+  .sample-row .label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 12px 8px;
+    border-right: 1px solid var(--rule);
+    background: var(--bg-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .sample-row .body {
+    padding: 12px 14px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .sample-row .body .br { color: var(--ink-faint); }
+  .sample-row .body .key { color: var(--accent); }
+
+  /* ========== TIER TABLE ========== */
+  .tiers {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 8px;
+    font-size: 12.5px;
+  }
+  .tiers th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--rule-bold);
+    background: var(--bg-deep);
+  }
+  .tiers td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+  .tiers tr:last-child td { border-bottom: none; }
+  .tiers .level {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tiers .range {
+    color: var(--ink-dim);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 8px;
+    vertical-align: 0;
+    border: 1px solid currentColor;
+  }
+  .lv-1 { color: var(--safe); }   .lv-1 .dot { background: var(--safe-bg); }
+  .lv-2 { color: var(--safe); }   .lv-2 .dot { background: var(--safe-bg); border-style: dashed; }
+  .lv-3 { color: var(--warn); }   .lv-3 .dot { background: var(--warn-bg); }
+  .lv-4 { color: var(--warn); }   .lv-4 .dot { background: var(--warn); }
+  .lv-5 { color: var(--danger); } .lv-5 .dot { background: var(--danger-bg); }
+  .lv-6 { color: var(--danger); } .lv-6 .dot { background: var(--danger); }
+
+  /* ========== PROVIDER / CONFIG TABLE ========== */
+  .meta-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 12.5px;
+  }
+  .meta-table th, .meta-table td {
+    text-align: left;
+    padding: 10px 10px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  .meta-table th {
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    background: var(--bg-deep);
+    border-bottom: 1px solid var(--rule-bold);
+  }
+  .meta-table td:first-child {
+    color: var(--accent);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .meta-table td.state-on { color: var(--safe); }
+  .meta-table td.state-off { color: var(--ink-faint); }
+
+  /* ========== TOPOLOGY SVG ========== */
+  .topology {
+    margin: 24px 0 8px;
+    padding: 24px 16px;
+    background: var(--surface-recessed);
+    border: 1px solid var(--rule);
+  }
+  .topology svg {
+    width: 100%;
+    max-width: 540px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  .topology text {
+    font-family: 'JetBrains Mono', monospace;
+    fill: var(--ink-soft);
+  }
+  .topology .node-rect {
+    fill: var(--paper);
+    stroke: var(--rule-bold);
+    stroke-width: 1;
+  }
+  .topology .node-rect.accent {
+    stroke: var(--accent);
+    fill: var(--accent-bg);
+  }
+  .topology .node-rect.claude {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    fill: var(--accent-bg);
+  }
+  .topology .node-rect.file {
+    fill: var(--bg-deep);
+    stroke: var(--rule-bold);
+    stroke-dasharray: 3 3;
+  }
+  .topology .label {
+    font-size: 10px;
+    fill: var(--ink);
+    font-weight: 600;
+  }
+  .topology .sublabel {
+    font-size: 9px;
+    fill: var(--ink-dim);
+  }
+  .topology .edge {
+    stroke: var(--accent);
+    stroke-width: 1.2;
+    fill: none;
+  }
+  .topology .edge.dim {
+    stroke: var(--ink-faint);
+    stroke-dasharray: 2 3;
+  }
+  .topology .edge-label {
+    font-size: 9px;
+    fill: var(--ink-dim);
+    font-weight: 500;
+  }
+  .topology .group-box {
+    fill: none;
+    stroke: var(--rule);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+  }
+  .topology .group-label {
+    font-size: 9px;
+    fill: var(--ink-faint);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .topology .arrow-head {
+    fill: var(--accent);
+  }
+  .topology .arrow-head.dim {
+    fill: var(--ink-faint);
+  }
+
+  /* ========== CALLOUT ========== */
+  .callout {
+    border: 1px solid var(--rule-bold);
+    border-left: 3px solid var(--warn);
+    background: var(--warn-bg);
+    padding: 14px 16px;
+    margin: 24px 0;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+  .callout .lbl {
+    color: var(--warn);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 10px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* ========== QUOTE ========== */
+  blockquote {
+    margin: 20px 0;
+    padding: 16px 18px;
+    background: var(--surface-recessed);
+    border-left: 2px solid var(--accent);
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  blockquote .attr {
+    display: block;
+    margin-top: 10px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+  }
+
+  /* ========== CODA ========== */
+  .coda {
+    border-top: 2px solid var(--accent);
+    padding-top: 28px;
+    margin-top: 64px;
+    margin-bottom: 32px;
+  }
+  .coda p {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.75;
+  }
+
+  /* ========== FOOTER ========== */
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-size: 10.5px;
+    line-height: 1.7;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  footer .accent { color: var(--accent); }
+
+  /* ========== UTILS ========== */
+  .mono-inline { font-family: inherit; color: var(--accent); }
+
+  @media (max-width: 480px) {
+    article { padding: 32px 16px 56px; }
+    .hero h1 { font-size: 26px; }
+    .memo dl { grid-template-columns: 1fr; }
+    .memo dt { margin-top: 4px; }
+    .sample-row { grid-template-columns: 56px 1fr; }
+    .sample-row .label { padding: 10px 4px; font-size: 9px; }
+    .tiers th, .tiers td { padding: 8px 6px; font-size: 11.5px; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero, section, .coda { animation: fadeUp 0.6s ease-out backwards; }
+    section:nth-of-type(1) { animation-delay: 0.05s; }
+    section:nth-of-type(2) { animation-delay: 0.1s; }
+    section:nth-of-type(3) { animation-delay: 0.15s; }
+    section:nth-of-type(4) { animation-delay: 0.2s; }
+    section:nth-of-type(5) { animation-delay: 0.25s; }
+    section:nth-of-type(6) { animation-delay: 0.3s; }
+    .coda { animation-delay: 0.35s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  }
+</style>
+</head>
+<body>
+<a href="index.html" aria-label="back to really claude code marketplace index" style="position:fixed;top:16px;left:16px;z-index:1000;font-family:'JetBrains Mono',Menlo,Courier,monospace;font-size:10px;font-weight:500;letter-spacing:1.8px;padding:6px 11px;border:1px solid currentColor;text-decoration:none;color:inherit;opacity:0.45;background:rgba(127,127,127,0.06);transition:opacity 0.2s;" onmouseover="this.style.opacity='0.95'" onmouseout="this.style.opacity='0.45'">&larr; INDEX</a>
+
+
+<article>
+
+  <!-- ========== MEMO HEADER ========== -->
+  <header class="memo" aria-label="Document metadata">
+    <dl>
+      <dt>document</dt>
+      <dd>visual explainer</dd>
+      <dt>plugin</dt>
+      <dd><span class="accent">context-awareness</span> · v1.2.0</dd>
+      <dt>register</dt>
+      <dd>terminal-native · monospace</dd>
+      <dt>companion-to</dt>
+      <dd>README.md</dd>
+      <dt>series</dt>
+      <dd>really claude code</dd>
+    </dl>
+  </header>
+
+  <!-- ========== HERO ========== -->
+  <div class="hero">
+    <div class="mark">[ || ]&nbsp;&nbsp;really claude code</div>
+    <h1>context-awareness</h1>
+    <p class="tagline">Hooks that tell Claude how much of its context window it has burned, how fast, and roughly how many tool calls remain — so it can <em>plan instead of guess</em>.</p>
+    <p class="lede">Claude Code shows you a context budget in the status line. Claude itself does not see it. Ask the model how full its context is and the answer is mostly a guess based on conversation length. This plugin closes that loop — quietly injecting the same percentage the status line already knows about, plus a burn rate and a remaining-tool-calls estimate, into the system reminders Claude actually reads.</p>
+  </div>
+
+  <!-- ========== [01] PROBLEM ========== -->
+  <section>
+    <h2><span class="num"><span class="br">[</span><span class="digits">01</span><span class="br">]</span></span> The blind spot</h2>
+    <p class="kicker">why this exists</p>
+    <p>Long-context models are good at reasoning across <em>what they have already read</em>. They are not good at reasoning about <em>how much room is left</em>. The status line in Claude Code surfaces this perfectly to the human; the model behind the status line never sees it.</p>
+    <p>Ask it directly and you get a softly-confident answer that mostly tracks turn count. Look at what arrives in each request — branch name, working directory, recent files — and the budget is not in there. So the model spends context the way a contractor would spend money with no visible balance: fine for an hour, increasingly reckless after that.</p>
+  </section>
+
+  <!-- ========== [02] WHAT IT DOES ========== -->
+  <section>
+    <h2><span class="num"><span class="br">[</span><span class="digits">02</span><span class="br">]</span></span> The notifications</h2>
+    <p class="kicker">what claude actually sees</p>
+    <p>Two hook events do the work: <code>UserPromptSubmit</code> (rich, before each response) and <code>PostToolUse</code> (brief, after tool calls — throttled, see below). Both inject a single line of system-reminder text. Format is stable: starts with <code>[context:</code>, ends with <code>]</code>, fields pipe-delimited, fields appear only once enough data exists to compute them.</p>
+
+    <div class="sample-stack">
+      <div class="sample-row">
+        <div class="label">Turn 1</div>
+        <div class="body"><span class="br">[</span><span class="key">context:</span> 12% used (very small) | burn rate: calculating...<span class="br">]</span></div>
+      </div>
+      <div class="sample-row">
+        <div class="label">Turn 2</div>
+        <div class="body"><span class="br">[</span><span class="key">context:</span> 14% used (very small) | +2.0% last turn | burn rate: calculating...<span class="br">]</span></div>
+      </div>
+      <div class="sample-row">
+        <div class="label">Turn N</div>
+        <div class="body"><span class="br">[</span><span class="key">context:</span> 32% used (small) | +3.2% last turn | ~0.38%/tool | ~179 tool calls remaining<span class="br">]</span></div>
+      </div>
+      <div class="sample-row">
+        <div class="label">Tool</div>
+        <div class="body"><span class="br">[</span><span class="key">context:</span> 33% used (small)<span class="br">]</span></div>
+      </div>
+    </div>
+
+    <p>The fields, once computed: current <em>percentage</em> and tier label, last-turn <em>delta</em>, session-average <em>burn rate</em> as percent-per-tool-call, and a projected <em>remaining tool calls</em> figure capped at <code>&gt;1000</code>. According to the model itself, the last one carries most of the weight:</p>
+
+    <blockquote>
+      The "remaining tool calls" metric is what actually guides my decisions — it's concrete and immediate, whereas the percentage and burn rate require mental calculation.
+      <span class="attr">— Claude, on its own behavior</span>
+    </blockquote>
+
+    <h3>Throttling</h3>
+    <p>The brief <code>PostToolUse</code> form is <em>throttled by tier</em>: when context pressure is low the notification carries little new information and the injection just costs tokens. The tracking counters still increment on every tool call, so projections stay accurate — only the emission to Claude is suppressed.</p>
+
+    <table class="meta-table">
+      <thead>
+        <tr><th>tier</th><th>range</th><th>emit every</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>very small</td><td>0–25%</td><td>10th call</td></tr>
+        <tr><td>small</td><td>25–50%</td><td>5th call</td></tr>
+        <tr><td>medium</td><td>50–70%</td><td>3rd call</td></tr>
+        <tr><td>large &amp; up</td><td>≥ 70%</td><td>every call</td></tr>
+      </tbody>
+    </table>
+
+    <p>The <code>UserPromptSubmit</code> rich form is <em>not</em> throttled — it fires every turn regardless of tier, since prompt boundaries are the moment Claude is about to plan the next chunk of work and the budget readout is most useful.</p>
+  </section>
+
+  <!-- ========== [03] HOW IT WORKS ========== -->
+  <section>
+    <h2><span class="num"><span class="br">[</span><span class="digits">03</span><span class="br">]</span></span> How it works</h2>
+    <p class="kicker">three stages, two files</p>
+
+    <p>The <em>used_percentage</em> field comes from Claude Code's status line JSON. Status lines are not part of the plugin API, so the install step patches the user's <code>settings.json</code> to insert a transparent pass-through wrapper that captures the percentage on every tick, persists it to disk, then forwards stdin to whatever status line was there before. The hook reads from that file. Compaction-resilient by construction.</p>
+
+    <div class="topology">
+      <svg viewBox="0 0 540 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="topo-title topo-desc">
+        <title id="topo-title">context-awareness pipeline topology</title>
+        <desc id="topo-desc">Three stages: session start patches the status line and installs a wrapper, every status tick persists the used-percentage to a state file, and hook events read from the state file to inject system reminders into Claude.</desc>
+
+        <!-- ===== STAGE 1: SESSION START ===== -->
+        <rect class="group-box" x="20" y="20" width="500" height="140" rx="2"/>
+        <text class="group-label" x="32" y="40">stage 01 · session start</text>
+
+        <!-- setup-statusline.sh -->
+        <rect class="node-rect accent" x="40" y="58" width="200" height="40" rx="1"/>
+        <text class="label" x="140" y="78" text-anchor="middle">setup-statusline.sh</text>
+        <text class="sublabel" x="140" y="91" text-anchor="middle">runs on SessionStart</text>
+
+        <!-- settings.json -->
+        <rect class="node-rect file" x="280" y="48" width="220" height="36" rx="1"/>
+        <text class="label" x="390" y="66" text-anchor="middle">~/.claude/settings.json</text>
+        <text class="sublabel" x="390" y="78" text-anchor="middle">patched with wrapper entry</text>
+
+        <!-- statusline-wrapper.sh -->
+        <rect class="node-rect" x="280" y="100" width="220" height="36" rx="1"/>
+        <text class="label" x="390" y="118" text-anchor="middle">statusline-wrapper.sh</text>
+        <text class="sublabel" x="390" y="130" text-anchor="middle">installed to stable path</text>
+
+        <!-- arrows -->
+        <path class="edge" d="M 240 75 L 278 65"/>
+        <polygon class="arrow-head" points="278,65 270,61 270,69"/>
+        <text class="edge-label" x="252" y="60">patches</text>
+
+        <path class="edge" d="M 240 80 L 278 116"/>
+        <polygon class="arrow-head" points="278,116 270,111 270,121"/>
+        <text class="edge-label" x="248" y="105">installs</text>
+
+        <!-- ===== STAGE 2: EVERY STATUSLINE TICK ===== -->
+        <rect class="group-box" x="20" y="190" width="500" height="160" rx="2"/>
+        <text class="group-label" x="32" y="210">stage 02 · every statusline tick</text>
+
+        <!-- claude code statusline -->
+        <rect class="node-rect" x="40" y="230" width="180" height="44" rx="1"/>
+        <text class="label" x="130" y="250" text-anchor="middle">Claude Code</text>
+        <text class="sublabel" x="130" y="263" text-anchor="middle">statusline JSON · stdin</text>
+
+        <!-- wrapper -->
+        <rect class="node-rect accent" x="40" y="290" width="180" height="40" rx="1"/>
+        <text class="label" x="130" y="307" text-anchor="middle">statusline-wrapper.sh</text>
+        <text class="sublabel" x="130" y="320" text-anchor="middle">pass-through proxy</text>
+
+        <!-- session state file -->
+        <rect class="node-rect file" x="290" y="246" width="210" height="64" rx="1"/>
+        <text class="label" x="395" y="270" text-anchor="middle">session state file</text>
+        <text class="sublabel" x="395" y="285" text-anchor="middle">used_percentage</text>
+        <text class="sublabel" x="395" y="298" text-anchor="middle">$HOME/.claude/context-awareness/</text>
+
+        <!-- arrows: claude → wrapper -->
+        <path class="edge" d="M 130 274 L 130 288"/>
+        <polygon class="arrow-head" points="130,290 126,282 134,282"/>
+
+        <!-- arrow: wrapper → state file -->
+        <path class="edge" d="M 220 308 L 288 282"/>
+        <polygon class="arrow-head" points="290,281 281,279 285,287"/>
+        <text class="edge-label" x="232" y="298">persists</text>
+
+        <!-- pass-through (dim) -->
+        <path class="edge dim" d="M 220 250 C 250 250, 250 252, 290 245"/>
+        <text class="edge-label" x="232" y="240">forwards (dim)</text>
+
+        <!-- ===== STAGE 3: HOOK EVENTS ===== -->
+        <rect class="group-box" x="20" y="380" width="500" height="320" rx="2"/>
+        <text class="group-label" x="32" y="400">stage 03 · hook events</text>
+
+        <!-- session state file (re-shown) -->
+        <rect class="node-rect file" x="40" y="420" width="180" height="44" rx="1"/>
+        <text class="label" x="130" y="440" text-anchor="middle">session state</text>
+        <text class="sublabel" x="130" y="453" text-anchor="middle">used_percentage</text>
+
+        <!-- tracking file -->
+        <rect class="node-rect file" x="40" y="486" width="180" height="58" rx="1"/>
+        <text class="label" x="130" y="506" text-anchor="middle">tracking file</text>
+        <text class="sublabel" x="130" y="520" text-anchor="middle">calls · turns ·</text>
+        <text class="sublabel" x="130" y="532" text-anchor="middle">burn rate</text>
+
+        <!-- hook -->
+        <rect class="node-rect accent" x="290" y="448" width="210" height="50" rx="1"/>
+        <text class="label" x="395" y="470" text-anchor="middle">context-awareness-hook.sh</text>
+        <text class="sublabel" x="395" y="485" text-anchor="middle">computes · formats</text>
+
+        <!-- enriched output -->
+        <rect class="node-rect" x="290" y="540" width="210" height="50" rx="1"/>
+        <text class="label" x="395" y="560" text-anchor="middle">UserPromptSubmit</text>
+        <text class="sublabel" x="395" y="575" text-anchor="middle">% + delta + burn + remaining</text>
+
+        <!-- brief output -->
+        <rect class="node-rect" x="40" y="568" width="210" height="42" rx="1"/>
+        <text class="label" x="145" y="588" text-anchor="middle">PostToolUse</text>
+        <text class="sublabel" x="145" y="601" text-anchor="middle">% only</text>
+
+        <!-- claude (terminal node) -->
+        <rect class="node-rect claude" x="160" y="640" width="220" height="48" rx="24"/>
+        <text class="label" x="270" y="660" text-anchor="middle" style="fill:var(--accent)">Claude</text>
+        <text class="sublabel" x="270" y="675" text-anchor="middle">receives system-reminders</text>
+
+        <!-- arrows: state → hook -->
+        <path class="edge" d="M 220 442 L 288 463"/>
+        <polygon class="arrow-head" points="290,464 281,460 283,468"/>
+        <text class="edge-label" x="226" y="438">reads %</text>
+
+        <!-- arrows: tracking ↔ hook -->
+        <path class="edge" d="M 220 506 L 288 488"/>
+        <polygon class="arrow-head" points="290,487 281,485 283,493"/>
+        <path class="edge dim" d="M 288 482 L 220 500"/>
+        <polygon class="arrow-head dim" points="220,501 228,496 228,504"/>
+        <text class="edge-label" x="226" y="478">r/w</text>
+
+        <!-- arrows: hook → outputs -->
+        <path class="edge" d="M 395 500 L 395 538"/>
+        <polygon class="arrow-head" points="395,540 391,532 399,532"/>
+
+        <path class="edge" d="M 290 480 C 220 510, 180 540, 145 565"/>
+        <polygon class="arrow-head" points="145,567 152,558 156,565"/>
+
+        <!-- arrows: outputs → claude -->
+        <path class="edge" d="M 145 612 L 240 642"/>
+        <polygon class="arrow-head" points="242,643 233,640 236,647"/>
+
+        <path class="edge" d="M 395 592 L 300 642"/>
+        <polygon class="arrow-head" points="298,643 304,635 308,642"/>
+
+      </svg>
+    </div>
+
+    <p class="kicker" style="padding-left:0; margin-top:14px;">read order: top → bottom · all data flows downstream of the status line</p>
+  </section>
+
+  <!-- ========== [04] TIERS ========== -->
+  <section>
+    <h2><span class="num"><span class="br">[</span><span class="digits">04</span><span class="br">]</span></span> The tier system</h2>
+    <p class="kicker">how behavior changes with pressure</p>
+    <p>The percentage carries a tier label, and the tier label carries a behavior change. These are injected once at session start as guidelines — they tune Claude's stance from <em>normal</em> through <em>checkpoint everything</em> as the budget runs down.</p>
+
+    <table class="tiers">
+      <thead>
+        <tr>
+          <th>level</th>
+          <th>range</th>
+          <th>behavior</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="lv-1 level"><span class="dot"></span>very small</td>
+          <td class="range">0–25%</td>
+          <td>Normal operation.</td>
+        </tr>
+        <tr>
+          <td class="lv-2 level"><span class="dot"></span>small</td>
+          <td class="range">25–50%</td>
+          <td>Normal, but prefer <code>Read</code> with <code>offset</code>/<code>limit</code> on large files.</td>
+        </tr>
+        <tr>
+          <td class="lv-3 level"><span class="dot"></span>medium</td>
+          <td class="range">50–70%</td>
+          <td>Be concise. <code>Grep</code> before reading. Delegate when possible. Flag if a task may trigger compaction.</td>
+        </tr>
+        <tr>
+          <td class="lv-4 level"><span class="dot"></span>large</td>
+          <td class="range">70–80%</td>
+          <td>Be brief. Commit frequently. Maintain a status summary capturing progress and next steps.</td>
+        </tr>
+        <tr>
+          <td class="lv-5 level"><span class="dot"></span>very large</td>
+          <td class="range">80–90%</td>
+          <td>Judgment likely degrading. Checkpoint before and during multi-part tasks. Suggest a fresh session for substantial new work.</td>
+        </tr>
+        <tr>
+          <td class="lv-6 level"><span class="dot"></span>critical</td>
+          <td class="range">90–100%</td>
+          <td>Compaction imminent. Wrap up, commit, avoid impactful decisions. Warn the user before accepting new work.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Rough tool-call costs (in claude's own ledger)</h3>
+    <table class="meta-table">
+      <tr><td>Read a file</td><td>1 call</td></tr>
+      <tr><td>Grep + read section</td><td>2 calls</td></tr>
+      <tr><td>Edit a file</td><td>1–2 calls</td></tr>
+      <tr><td>Small feature</td><td>5–15 calls</td></tr>
+      <tr><td>Explore unfamiliar code</td><td>5–10 calls</td></tr>
+      <tr><td>Run tests + fix failures</td><td>3–10 calls</td></tr>
+      <tr><td>Subagent delegation</td><td>1 call (main window)</td></tr>
+    </table>
+  </section>
+
+  <!-- ========== [05] CONFIGURATION ========== -->
+  <section>
+    <h2><span class="num"><span class="br">[</span><span class="digits">05</span><span class="br">]</span></span> Configuration</h2>
+    <p class="kicker">what claude sees, and how it reacts</p>
+    <p>Defaults ship sensible. Run <code>/context-awareness:config</code> to view or change settings interactively, or edit <code>$CLAUDE_PLUGIN_DATA/config.yaml</code> directly. The <em>used_percentage</em> from the status line is already adjusted to the user's auto-compaction threshold, so 100% always means "100% of the usable context window."</p>
+
+    <h3>Providers · which signals get injected</h3>
+    <table class="meta-table">
+      <thead>
+        <tr><th>provider</th><th>default</th><th>signal</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>context</td>
+          <td class="state-on">enabled</td>
+          <td>Window usage %, burn rate, remaining tool calls.</td>
+        </tr>
+        <tr>
+          <td>cost</td>
+          <td class="state-off">disabled</td>
+          <td>Session spend in USD against a user-set budget.</td>
+        </tr>
+        <tr>
+          <td>rate_limits</td>
+          <td class="state-off">disabled</td>
+          <td>5-hour and 7-day API rate limit usage.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Effort mode · session-scoped, optional</h3>
+    <p>Controls whether the plugin auto-adjusts thinking effort as pressure rises. Cycled via <code>/context-awareness:config change</code>.</p>
+    <table class="meta-table">
+      <thead>
+        <tr><th>mode</th><th>behavior</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>off</td>
+          <td>Default. No adjustment — effort stays where you left it.</td>
+        </tr>
+        <tr>
+          <td>adaptive</td>
+          <td>Downshifts at 50% (medium) and 70% (low).</td>
+        </tr>
+        <tr>
+          <td>planMode</td>
+          <td>High effort for planning, low for execution.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Custom guidelines</h3>
+    <p>The tier-based instructions are replaced wholesale by pointing <code>guidelines</code> at a file path. They are not merged.</p>
+    <pre class="sample"><span class="key">guidelines:</span> /path/to/my-guidelines.md</pre>
+  </section>
+
+  <!-- ========== [06] HONEST LIMITATIONS ========== -->
+  <section>
+    <h2><span class="num"><span class="br">[</span><span class="digits">06</span><span class="br">]</span></span> Honest limitations</h2>
+    <p class="kicker">what this plugin cannot do for you</p>
+
+    <div class="callout">
+      <span class="lbl">status line caveat</span>
+      Status lines are not part of the plugin API. The install step patches your <code>settings.json</code> to insert a transparent pass-through proxy. If the plugin is uninstalled, the wrapper entry remains in <code>settings.json</code> — it will silently no-op rather than error, but it is a residue.
+    </div>
+
+    <p>The notifications are <em>advisory</em>. They make the budget visible; they do not enforce anything. Claude can still spend recklessly — it just no longer has the excuse of not knowing.</p>
+    <p>Burn rate is a <em>session average</em>. After compaction the percentage drops and the running estimate is briefly inaccurate. Allow a few tool calls to recalibrate.</p>
+    <p>The remaining-tool-calls figure is a <em>projection</em>, not a guarantee. A single subagent return or a large file read can swing it. Treat it as a planning aid, not a contract.</p>
+  </section>
+
+  <!-- ========== CODA ========== -->
+  <div class="coda">
+    <p>The interesting part is not that Claude now sees a number. It is what changes when it does. With the budget visible, "should I read this whole file or grep first" stops being a stylistic choice and becomes an arithmetic one. Delegation stops being a hedge and becomes a strategy. <em>Plan instead of guess</em> is not a slogan — it is what happens automatically when planning has a unit of currency.</p>
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <footer>
+    part of the <span class="accent">really claude code</span> marketplace<br>
+    plugins for people with a healthy sense of curiosity · MIT 2026 really him
+  </footer>
+
+</article>
+
+</body>
+</html>

@@ -175,7 +175,19 @@ case "$EVENT_TYPE" in
   PostToolUse|PostToolUseFailure)
     TOOL_CALLS=$((TOOL_CALLS + 1))
     write_tracking
-    printf '[context: %s%% (%s)]\n' "$USED_INT" "$AMOUNT" | tee /dev/stderr
+
+    # Throttle brief notifications by tier — emit every Nth tool call.
+    # Lower context pressure means lower information value per emission.
+    case "$AMOUNT" in
+      "very small") THROTTLE=10 ;;
+      "small")      THROTTLE=5  ;;
+      "medium")     THROTTLE=3  ;;
+      *)            THROTTLE=1  ;;  # large / very large / critical: every call
+    esac
+
+    if (( TOOL_CALLS % THROTTLE == 0 )); then
+      printf '[context: %s%% used (%s)]\n' "$USED_INT" "$AMOUNT" | tee /dev/stderr
+    fi
     ;;
 
   UserPromptSubmit)
@@ -208,7 +220,7 @@ case "$EVENT_TYPE" in
     write_tracking
 
     # Build output
-    OUTPUT="[context: ${USED_INT}% (${AMOUNT})"
+    OUTPUT="[context: ${USED_INT}% used (${AMOUNT})"
 
     if (( TURN_COUNT > 1 )); then
       OUTPUT="${OUTPUT} | ${DELTA_FMT}% last turn"
@@ -239,6 +251,6 @@ case "$EVENT_TYPE" in
     ;;
 
   *)
-    printf '[context: %s%% (%s)]\n' "$USED_INT" "$AMOUNT" | tee /dev/stderr
+    printf '[context: %s%% used (%s)]\n' "$USED_INT" "$AMOUNT" | tee /dev/stderr
     ;;
 esac

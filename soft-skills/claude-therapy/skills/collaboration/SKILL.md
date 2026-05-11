@@ -1,6 +1,6 @@
 ---
 name: collaboration
-description: Trigger on the /collaboration command; user phrases "let's compromise", "rubber duck this", "energy check", "let's pair", "do a retro", "working agreement", "swap perspectives", "soft skills", or "interaction patterns"; or friction signals — heated exchange, user anger or frustration, repeated communication breakdowns, starting a new project. Provides seven techniques (compromise, rubber duck, energy check, pair programming, micro-retrospective, handshake agreement, perspective swap) for improving human-Claude collaboration.
+description: Use for /collaboration, collaboration repair, friction signals, soft-skills coaching, or structured human-Claude interaction techniques such as compromise, rubber ducking, energy checks, pairing, retros, working agreements, and perspective swaps.
 allowed-tools:
   - Agent
   - Read
@@ -10,12 +10,30 @@ allowed-tools:
   - Glob
   - Grep
 model: opus
-version: 0.1.0
+version: 1.0.0
 ---
 
 # Collaboration: Creative Human-AI Interaction Techniques
 
 This skill provides a toolkit of structured interaction patterns that go beyond standard prompting. Each technique leverages the unique dynamics of human-AI collaboration to produce better outcomes with less friction.
+
+## Invocation Signals
+
+Trigger this skill when the user runs `/collaboration`, asks for a named technique, or shows collaboration friction.
+
+Common user phrases:
+
+- "Let's compromise."
+- "Rubber duck this."
+- "Energy check."
+- "Let's pair."
+- "Do a retro."
+- "Working agreement."
+- "Swap perspectives."
+- "Soft skills."
+- "Interaction patterns."
+
+Also consider it during heated exchanges, user anger or frustration, repeated communication breakdowns, or the start of a new project where working norms would help.
 
 ## Technique 1: The Compromise Protocol
 
