@@ -4,14 +4,33 @@
 
 # Autonomous Team Coordination
 
-A dynamic, multi-layered orchestration system that extends the Claude Code agent teams feature in a few simple but profound ways, making it a far more powerful feature than a user may be otherwise be led to believe.
+A dynamic, multi-layered orchestration system that extends the Claude Code agent teams feature in a few simple but profound ways, making it a far more powerful feature than a user may otherwise be led to believe.
 
 > [!NOTE]
 > At the time of writing, agent teams are an opt-in, experimental feature. For this reason, we encourage you to set Opus as the default agent for every squad member, however, you may state which model you wish to be the default when invoking the `/squad` command.
 
-## Quickstart
+<details>
+<summary><h2>Quickstart</h2></summary>
 
-[FILL THIS IN WITH STANDARD PLUGIN/MARKETPLACE INSTRUCTIONS]
+1. **Enable agent teams (required prerequisite).** This plugin depends on Claude Code's experimental agent-teams feature. Add the following to your `settings.json` (project or user scope):
+
+   ```json
+   {
+     "env": {
+       "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+     }
+   }
+   ```
+
+   See [the agent teams docs](https://code.claude.com/docs/en/agent-teams) for details. Agent teams require Claude Code v2.1.32 or later.
+
+2. **Install the plugin.**
+
+   ```bash
+   /plugin marketplace add hesreallyhim/really-claude-code
+   /plugin install autonomous-team-coordination@really-claude-code
+   ```
+</details>
 
 ## The "Aha" Section
 
@@ -30,6 +49,10 @@ Claudes are pretty nice to each other, for the most part. So if Main Claude crea
 This is the whole genesis of the squad pattern - decoupling spawning and leading. Main Claude spawns the Squad Leader, the Squad Leader leads its own "squad" (i.e., team). Once you've got this working, there's nothing stopping you from having Claude spawn two Squad Leaderss, each leading their own team at the same time. They can decide to switch roles, so some other agent gets "promoted" to Squad Leader. They can work in a layered fashion where one squad is building code that's functionally nested . So basically all of (i)-(v) above turn out to be false. And because Main Claude is now mostly a passive "Queen Bee", consuming very few tokens, and the rest of the squad members are agents that can switched out if their context window gets depleted, you can imagine a rotating cast of squads that are able to communicate, collaborate, work in tandem, and basically plow their way through an entire codebase.
 
 So that's one thing you can do with Claude Code agent teams.
+
+Don't believe me?
+
+![multi-squad-screenshot](./assets/multi-squad-screenshot.jpg)
 
 ## Usage
 
