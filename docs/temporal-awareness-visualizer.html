@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>temporal-awareness — really claude code</title>
+<meta name="description" content="How temporal-awareness gives Claude a calibrated, measured sense of how long its own work actually takes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /*  Escapement variant — really-claude-code-brand v0.1 (Riverbed)
+      navy + bone · Fraunces + Atkinson Hyperlegible + IBM Plex Mono.
+      The escapement is the clockwork part that regulates a timepiece so it keeps
+      accurate time — the fitting emblem for a plugin that regulates Claude's sense
+      of how long its own work takes. */
+  :root {
+    --bg: #f1ede4;
+    --paper: #f7f3ea;
+    --surface: #ffffff;
+    --surface-low: #efe9df;
+    --shade: rgba(22, 36, 61, 0.04);
+    --ink: #16243d;
+    --ink-soft: #2d3e5c;
+    --ink-dim: #5e6c87;
+    --ink-faint: #9aa3b6;
+    --rule: rgba(22, 36, 61, 0.16);
+    --rule-bold: rgba(22, 36, 61, 0.42);
+    --navy: #1e3a5f;
+    --navy-deep: #0f1e35;
+    --brass: #a87c34;
+    --brass-soft: #d8b674;
+    --rust: #9e4a2f;          /* "doesn't collapse" / gates */
+    --rust-bg: rgba(158, 74, 47, 0.08);
+    --sage: #4f6f52;          /* measured / real data */
+    --sage-bg: rgba(79, 111, 82, 0.09);
+    --brass-bg: rgba(168, 124, 52, 0.10);
+    --navy-bg: rgba(30, 58, 95, 0.06);
+
+    --display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --body: "Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: "IBM Plex Mono", "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1825;
+      --paper: #15202f;
+      --surface: #1a273a;
+      --surface-low: #131d2b;
+      --shade: rgba(241, 237, 228, 0.04);
+      --ink: #f1ede4;
+      --ink-soft: #d4cfc2;
+      --ink-dim: #8a9aab;
+      --ink-faint: #5d6a7d;
+      --rule: rgba(241, 237, 228, 0.16);
+      --rule-bold: rgba(241, 237, 228, 0.4);
+      --navy: #6ba2d4;
+      --navy-deep: #b8d4ed;
+      --brass: #d8b674;
+      --brass-soft: #a87c34;
+      --rust: #d98060;
+      --rust-bg: rgba(217, 128, 96, 0.12);
+      --sage: #8fb693;
+      --sage-bg: rgba(143, 182, 147, 0.12);
+      --brass-bg: rgba(216, 182, 116, 0.10);
+      --navy-bg: rgba(107, 162, 212, 0.10);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink-soft);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  article {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 60px 32px 96px;
+  }
+
+  /* ========== BACK LINK ========== */
+  .backlink {
+    position: fixed; top: 16px; left: 16px; z-index: 1000;
+    font-family: var(--mono);
+    font-size: 10px; font-weight: 500; letter-spacing: 1.8px;
+    padding: 6px 11px; border: 1px solid currentColor;
+    text-decoration: none; color: var(--ink-dim);
+    background: var(--surface); opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+  .backlink:hover { opacity: 1; color: var(--navy); }
+
+  /* ========== MEMO HEADER ========== */
+  .memo {
+    border: 1px solid var(--rule-bold);
+    padding: 16px 18px;
+    margin-bottom: 52px;
+    background: var(--surface);
+    border-radius: 3px;
+  }
+  .memo dl {
+    margin: 0; display: grid;
+    grid-template-columns: 130px 1fr;
+    column-gap: 18px; row-gap: 5px;
+    font-family: var(--mono); font-size: 11.5px;
+  }
+  .memo dt {
+    color: var(--ink-faint); text-transform: uppercase;
+    letter-spacing: 0.09em; font-weight: 500;
+  }
+  .memo dd { margin: 0; color: var(--ink-soft); }
+  .memo dd .accent { color: var(--brass); font-weight: 600; }
+
+  /* ========== HERO ========== */
+  .hero { margin-bottom: 68px; }
+  .hero .mark {
+    font-family: var(--mono);
+    color: var(--brass); font-weight: 600;
+    font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-family: var(--display); font-weight: 500;
+    font-size: clamp(44px, 7vw, 74px); line-height: 0.98;
+    letter-spacing: -0.025em; margin: 0 0 20px; color: var(--ink);
+  }
+  .hero .tagline {
+    font-family: var(--display); font-style: italic; font-weight: 400;
+    font-size: clamp(19px, 2.4vw, 25px); line-height: 1.4;
+    color: var(--ink-soft); margin: 0 0 26px; max-width: 600px;
+  }
+  .hero .lede {
+    font-size: 16.5px; line-height: 1.7; color: var(--ink-soft);
+    max-width: 620px; margin: 0;
+  }
+  .hero em, .lede em { font-style: normal; color: var(--brass); font-weight: 700; }
+
+  /* ========== SECTIONS ========== */
+  section { margin-bottom: 72px; padding-top: 34px; position: relative; }
+  section::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0;
+    border-top: 1px solid var(--rule-bold); border-bottom: 1px solid var(--rule-bold);
+    height: 4px;
+  }
+  section h2 {
+    font-family: var(--display); font-weight: 500;
+    font-size: clamp(27px, 3.6vw, 37px); line-height: 1.1;
+    letter-spacing: -0.015em; color: var(--ink); margin: 0 0 6px;
+  }
+  section h2 .num {
+    font-family: var(--display); font-weight: 400; color: var(--brass);
+    margin-right: 14px; font-feature-settings: "lnum";
+  }
+  .kicker {
+    font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--ink-dim); margin: 0 0 26px;
+  }
+  section p { font-size: 16px; line-height: 1.7; color: var(--ink-soft); margin: 0 0 18px; }
+  section p em { font-style: italic; color: var(--ink); font-weight: 400; }
+  section p strong { color: var(--ink); font-weight: 700; }
+  code {
+    font-family: var(--mono); font-size: 0.86em;
+    background: var(--shade); color: var(--navy);
+    padding: 1px 5px; border-radius: 3px;
+  }
+  @media (prefers-color-scheme: dark) { code { color: var(--navy-deep); } }
+
+  h3 {
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.09em;
+    color: var(--ink-dim); margin: 34px 0 14px;
+  }
+
+  /* ========== SCALE BAR (order-of-magnitude) ========== */
+  .scale {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 4px; padding: 30px 28px 22px; margin: 26px 0;
+  }
+  .scale svg { width: 100%; height: auto; display: block; }
+  .scale .cap {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-dim);
+    letter-spacing: 0.06em; margin-top: 14px; text-align: center;
+  }
+
+  /* ========== TWO-BUCKET ========== */
+  .buckets { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 26px 0; }
+  .bucket {
+    border: 1px solid var(--rule); border-radius: 4px;
+    padding: 20px 20px 18px; background: var(--surface);
+  }
+  .bucket--collapse { border-top: 3px solid var(--brass); }
+  .bucket--gate { border-top: 3px solid var(--rust); }
+  .bucket__tag {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; font-weight: 600; margin-bottom: 3px;
+  }
+  .bucket--collapse .bucket__tag { color: var(--brass); }
+  .bucket--gate .bucket__tag { color: var(--rust); }
+  .bucket__title {
+    font-family: var(--display); font-size: 20px; color: var(--ink);
+    font-weight: 500; margin: 0 0 12px; line-height: 1.15;
+  }
+  .bucket ul { margin: 0; padding-left: 0; list-style: none; }
+  .bucket li {
+    font-size: 14px; line-height: 1.5; color: var(--ink-soft);
+    padding: 5px 0 5px 18px; position: relative; border-top: 1px dashed var(--rule);
+  }
+  .bucket li:first-child { border-top: none; }
+  .bucket li::before {
+    content: ""; position: absolute; left: 2px; top: 12px;
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .bucket--collapse li::before { background: var(--brass); }
+  .bucket--gate li::before { background: var(--rust); }
+  .bucket__note {
+    font-family: var(--display); font-style: italic; font-size: 13.5px;
+    color: var(--ink-dim); margin: 12px 0 0; line-height: 1.4;
+  }
+
+  /* ========== HISTOGRAM (real corpus) ========== */
+  .figure {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 4px; padding: 26px 24px 18px; margin: 26px 0;
+  }
+  .figure__head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
+  }
+  .figure__title {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-dim);
+  }
+  .figure__stat { font-family: var(--mono); font-size: 11px; color: var(--sage); font-weight: 600; }
+  .figure svg { width: 100%; height: auto; display: block; }
+
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0 6px; }
+  .kpi {
+    border: 1px solid var(--rule); border-radius: 4px; padding: 16px 16px 14px;
+    background: var(--sage-bg); border-left: 3px solid var(--sage);
+  }
+  .kpi__num { font-family: var(--display); font-size: 32px; font-weight: 500; color: var(--ink); line-height: 1; }
+  .kpi__num small { font-size: 15px; color: var(--ink-dim); font-weight: 400; }
+  .kpi__lbl {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-dim); margin-top: 8px;
+  }
+
+  /* ========== BUCKET TABLE ========== */
+  table.data { width: 100%; border-collapse: collapse; margin: 18px 0 6px; font-size: 14px; }
+  table.data th {
+    text-align: left; font-family: var(--mono); font-weight: 600;
+    font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--ink-faint); padding: 9px 10px;
+    border-bottom: 1px solid var(--rule-bold); background: var(--shade);
+  }
+  table.data td {
+    padding: 10px 10px; border-bottom: 1px solid var(--rule);
+    color: var(--ink-soft); vertical-align: middle;
+  }
+  table.data td:first-child { font-family: var(--mono); font-size: 12.5px; color: var(--navy); }
+  @media (prefers-color-scheme: dark){ table.data td:first-child{ color: var(--navy); } }
+  table.data td.n, table.data td.med { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .spreadbar { display: inline-block; height: 6px; border-radius: 3px; background: var(--brass-soft); vertical-align: middle; }
+
+  /* ========== PIPELINE SVG ========== */
+  .pipeline {
+    margin: 26px 0; padding: 26px 18px; background: var(--surface);
+    border: 1px solid var(--rule); border-radius: 4px;
+  }
+  .pipeline svg { width: 100%; max-width: 620px; height: auto; display: block; margin: 0 auto; }
+  .pipeline text { font-family: var(--mono); fill: var(--ink-soft); }
+  .pipeline .box { fill: var(--paper); stroke: var(--rule-bold); stroke-width: 1; }
+  .pipeline .box.accent { stroke: var(--brass); stroke-width: 1.4; fill: var(--brass-bg); }
+  .pipeline .box.file { fill: var(--surface-low); stroke: var(--rule-bold); stroke-dasharray: 3 3; }
+  .pipeline .box.term { stroke: var(--navy); stroke-width: 1.5; fill: var(--navy-bg); }
+  .pipeline .lbl { font-size: 11px; font-weight: 600; fill: var(--ink); }
+  .pipeline .sub { font-size: 9px; fill: var(--ink-dim); }
+  .pipeline .edge { stroke: var(--navy); stroke-width: 1.3; fill: none; }
+  .pipeline .ahead { fill: var(--navy); }
+  .pipeline .glabel { font-size: 9px; fill: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+  .pipeline .elabel { font-size: 9px; fill: var(--ink-dim); }
+
+  /* ========== HETEROGENEITY (prior not lookup) ========== */
+  .hetero {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 4px; padding: 24px 24px 20px; margin: 26px 0;
+  }
+  .hetero__title { font-family: var(--mono); font-size: 12px; color: var(--navy); font-weight: 600; letter-spacing: 0.04em; }
+  @media (prefers-color-scheme: dark){ .hetero__title{ color: var(--navy);} }
+  .hetero__bar-wrap { margin: 22px 0 8px; }
+  .hetero svg { width: 100%; height: auto; display: block; }
+  .hetero__cases { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+  .case { border: 1px solid var(--rule); border-radius: 4px; padding: 14px 16px; }
+  .case--low { border-left: 3px solid var(--sage); background: var(--sage-bg); }
+  .case--high { border-left: 3px solid var(--rust); background: var(--rust-bg); }
+  .case__q { font-family: var(--mono); font-size: 11px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .case__t { font-family: var(--display); font-size: 16px; color: var(--ink); margin: 4px 0 6px; font-weight: 500; }
+  .case__d { font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); margin: 0; }
+
+  /* ========== CALLOUT / QUOTE ========== */
+  .callout {
+    border: 1px solid var(--rule-bold); border-left: 3px solid var(--brass);
+    background: var(--brass-bg); padding: 16px 18px; margin: 24px 0;
+    font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); border-radius: 0 3px 3px 0;
+  }
+  .callout .lbl {
+    font-family: var(--mono); color: var(--brass); text-transform: uppercase;
+    letter-spacing: 0.1em; font-size: 10px; font-weight: 600; display: block; margin-bottom: 5px;
+  }
+  blockquote {
+    margin: 22px 0; padding: 18px 22px; background: var(--surface-low);
+    border-left: 3px solid var(--navy); border-radius: 0 3px 3px 0;
+    font-family: var(--display); font-style: italic; font-size: 17px;
+    line-height: 1.55; color: var(--ink-soft);
+  }
+  blockquote .attr {
+    display: block; margin-top: 10px; font-family: var(--mono); font-style: normal;
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint);
+  }
+  pre.sample {
+    background: var(--surface-low); border: 1px solid var(--rule);
+    border-left: 2px solid var(--brass); padding: 14px 16px; margin: 18px 0;
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+    color: var(--ink-soft); overflow-x: auto; white-space: pre-wrap; word-break: break-word; border-radius: 0 3px 3px 0;
+  }
+  pre.sample .c { color: var(--ink-faint); }
+  pre.sample .k { color: var(--brass); }
+
+  /* ========== CODA / FOOTER ========== */
+  .coda { border-top: 2px solid var(--brass); padding-top: 30px; margin-top: 72px; }
+  .coda p { font-size: 17px; line-height: 1.7; color: var(--ink-soft); }
+  .coda p em { font-style: italic; color: var(--ink); }
+  footer {
+    margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--rule);
+    font-family: var(--mono); font-size: 10.5px; line-height: 1.8;
+    color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  footer .accent { color: var(--brass); }
+
+  @media (max-width: 560px) {
+    article { padding: 40px 20px 64px; }
+    .memo dl { grid-template-columns: 1fr; }
+    .memo dt { margin-top: 5px; }
+    .buckets, .hetero__cases, .kpis { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero, section, .coda { animation: fadeUp 0.55s ease-out backwards; }
+    section:nth-of-type(1){animation-delay:.05s} section:nth-of-type(2){animation-delay:.1s}
+    section:nth-of-type(3){animation-delay:.15s} section:nth-of-type(4){animation-delay:.2s}
+    section:nth-of-type(5){animation-delay:.25s} section:nth-of-type(6){animation-delay:.3s}
+    .coda{animation-delay:.35s}
+    @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  }
+</style>
+</head>
+<body>
+
+<a class="backlink" href="index.html" aria-label="back to really claude code index">&larr; INDEX</a>
+
+<article>
+
+  <!-- ========== MEMO ========== -->
+  <header class="memo" aria-label="Document metadata">
+    <dl>
+      <dt>document</dt><dd>visual explainer</dd>
+      <dt>plugin</dt><dd><span class="accent">temporal-awareness</span> · v0.1.0</dd>
+      <dt>variant</dt><dd>Escapement — navy &amp; bone</dd>
+      <dt>companion-to</dt><dd>README.md</dd>
+      <dt>series</dt><dd>really claude code · agent autonomy</dd>
+    </dl>
+  </header>
+
+  <!-- ========== HERO ========== -->
+  <div class="hero">
+    <div class="mark">◷ really claude code</div>
+    <h1>temporal-awareness</h1>
+    <p class="tagline">Claude thinks in human developer-days. It works in agent-minutes. This plugin teaches it the difference — and grounds the correction in its own measured history.</p>
+    <p class="lede">Ask Claude how long a task will take and it answers <em>"one to two days"</em> — an estimate borrowed from human developers. But when the agent does the work, the part that dominates that estimate collapses to minutes. The gap is one to three <em>orders of magnitude</em>, which makes planning with agents nearly useless. temporal-awareness fixes the reasoning, then replaces the guess with data Claude was already generating and never looked at.</p>
+  </div>
+
+  <!-- ========== [01] THE BIAS ========== -->
+  <section>
+    <h2><span class="num">01</span>The wrong reference class</h2>
+    <p class="kicker">why the estimates are off by orders of magnitude</p>
+    <p>Claude's instinct for "how long" is trained on an enormous corpus of human-written estimates — Jira tickets, blog posts, retros, textbooks — all measured in developer-days. That world assumes a person types the code, context-switches between meetings, looks up docs, gets tired, and works an eight-hour day.</p>
+    <p>An agent pays almost none of those costs. The reading, writing, and wiring that <em>dominate</em> a human's estimate compress dramatically. So the model isn't computing a wrong answer — it's fluently echoing the wrong reference class. The result, on a log scale:</p>
+
+    <div class="scale">
+      <svg viewBox="0 0 640 150" role="img" aria-label="Log scale showing agent task durations clustered in minutes versus a human estimate of one to two days, far to the right.">
+        <!-- axis -->
+        <line x1="40" y1="96" x2="600" y2="96" stroke="var(--rule-bold)" stroke-width="1"/>
+        <!-- ticks: 1m, 10m, 1h, 8h, 1d, 2d roughly log-spaced -->
+        <g font-family="var(--mono)" font-size="10" fill="var(--ink-dim)" text-anchor="middle">
+          <line x1="70"  y1="92" x2="70"  y2="100" stroke="var(--rule-bold)"/><text x="70"  y="116">1 min</text>
+          <line x1="185" y1="92" x2="185" y2="100" stroke="var(--rule-bold)"/><text x="185" y="116">10 min</text>
+          <line x1="300" y1="92" x2="300" y2="100" stroke="var(--rule-bold)"/><text x="300" y="116">1 hr</text>
+          <line x1="415" y1="92" x2="415" y2="100" stroke="var(--rule-bold)"/><text x="415" y="116">8 hr</text>
+          <line x1="530" y1="92" x2="530" y2="100" stroke="var(--rule-bold)"/><text x="530" y="116">1 day</text>
+        </g>
+        <!-- agent cluster (minutes) -->
+        <rect x="120" y="72" width="130" height="20" rx="10" fill="var(--sage-bg)" stroke="var(--sage)" stroke-width="1"/>
+        <g fill="var(--sage)"><circle cx="150" cy="82" r="3"/><circle cx="168" cy="82" r="3"/><circle cx="182" cy="82" r="3"/><circle cx="196" cy="82" r="3"/><circle cx="214" cy="82" r="3"/><circle cx="232" cy="82" r="3"/></g>
+        <text x="185" y="58" text-anchor="middle" font-family="var(--display)" font-style="italic" font-size="15" fill="var(--ink)">where agent work actually lands</text>
+        <!-- human estimate marker -->
+        <line x1="545" y1="40" x2="545" y2="92" stroke="var(--rust)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <circle cx="545" cy="82" r="5" fill="var(--rust)"/>
+        <text x="545" y="34" text-anchor="middle" font-family="var(--display)" font-style="italic" font-size="15" fill="var(--rust)">"1–2 days"</text>
+        <!-- gap bracket -->
+        <path d="M 234 132 L 234 138 L 543 138 L 543 132" fill="none" stroke="var(--ink-faint)" stroke-width="1"/>
+        <text x="388" y="150" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-dim)">≈ 50–100× overestimate</text>
+      </svg>
+      <p class="cap">the same task, two reference classes · log-spaced axis</p>
+    </div>
+  </section>
+
+  <!-- ========== [02] THE REFRAME ========== -->
+  <section>
+    <h2><span class="num">02</span>Split what collapses from what doesn't</h2>
+    <p class="kicker">the core move — accurate, not just smaller</p>
+    <p>The fix is <em>not</em> "say a smaller number." That would just replace one wrong answer with another — because some things genuinely don't compress. The move is to decompose every estimate into two buckets, and treat them completely differently.</p>
+
+    <div class="buckets">
+      <div class="bucket bucket--collapse">
+        <div class="bucket__tag">collapses →</div>
+        <h3 class="bucket__title" style="font-family:var(--display);text-transform:none;color:var(--ink);letter-spacing:normal;margin-top:0;">Agent execution</h3>
+        <ul>
+          <li>reading &amp; navigating the code</li>
+          <li>writing and wiring the change</li>
+          <li>writing tests in the same loop</li>
+          <li>local iteration to green</li>
+        </ul>
+        <p class="bucket__note">Sized in the agent's timescale — seconds to minutes for most bounded tasks.</p>
+      </div>
+      <div class="bucket bucket--gate">
+        <div class="bucket__tag">doesn't collapse →</div>
+        <h3 class="bucket__title" style="font-family:var(--display);text-transform:none;color:var(--ink);letter-spacing:normal;margin-top:0;">Gates</h3>
+        <ul>
+          <li>CI pipelines, full test suites</li>
+          <li>builds, deploys, model training</li>
+          <li>human review &amp; sign-off</li>
+          <li>external / calendar waits</li>
+        </ul>
+        <p class="bucket__note">Runs at its own pace no matter how fast the agent is. On the machine's clock, or yours.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="lbl">the symmetry that keeps it honest</span>
+      Under-counting a real 20-minute CI run is <em>just as wrong</em> as over-counting typing time. A skill that only ever shrinks estimates would confidently claim a 50-million-row training job takes fifteen minutes. The two-bucket split is what prevents the correction from over-correcting.
+    </div>
+  </section>
+
+  <!-- ========== [03] THE MEASUREMENT ========== -->
+  <section>
+    <h2><span class="num">03</span>The data was already there</h2>
+    <p class="kicker">Claude's own /goal completions, hiding in the transcripts</p>
+    <p>Here is the part that turns a reasoning trick into a calibrated instrument. Every time you run <code>/goal</code>, Claude Code records the completion in the session transcript — including an <em>authoritative</em> duration field, <code>goal_status.durationMs</code>, computed by the harness itself. It was found by forensic search through transcripts and debug logs; the harness never advertises it.</p>
+    <p>Raw wall-clock is a trap — inflated 5–25× by overnight and idle gaps. But <em>completed</em> goals (<code>met == true</code>) are clean, because a goal only completes while it's being actively worked. The result is a small corpus of real durations — and it confirms the whole thesis:</p>
+
+    <div class="kpis">
+      <div class="kpi"><div class="kpi__num">~10<small> min</small></div><div class="kpi__lbl">median completed goal</div></div>
+      <div class="kpi"><div class="kpi__num">3.5–60<small> min</small></div><div class="kpi__lbl">full observed range</div></div>
+      <div class="kpi"><div class="kpi__num">0<small> / dozen</small></div><div class="kpi__lbl">goals measured in "days"</div></div>
+    </div>
+
+    <div class="figure">
+      <div class="figure__head">
+        <span class="figure__title">distribution · ~13 completed goals</span>
+        <span class="figure__stat">median ≈ 10 min</span>
+      </div>
+      <svg viewBox="0 0 620 220" role="img" aria-label="Histogram of about thirteen completed goal durations. Most cluster between five and ten minutes; the median is around ten minutes; a long tail reaches sixty minutes. None approach a full day.">
+        <!-- baseline -->
+        <line x1="46" y1="176" x2="600" y2="176" stroke="var(--rule-bold)" stroke-width="1"/>
+        <!-- bars: counts per bin, max count 5 -> scale 26px per count, base y=176 -->
+        <!-- bin <5 (1) -->
+        <rect x="60"  y="150" width="72" height="26"  fill="var(--sage-bg)" stroke="var(--sage)"/>
+        <text x="96"  y="144" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-dim)">1</text>
+        <!-- bin 5-10 (5) -->
+        <rect x="140" y="46" width="72" height="130" fill="var(--sage)" opacity="0.85"/>
+        <text x="176" y="40" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-dim)">5</text>
+        <!-- bin 10-20 (2) -->
+        <rect x="220" y="124" width="72" height="52" fill="var(--sage-bg)" stroke="var(--sage)"/>
+        <text x="256" y="118" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-dim)">2</text>
+        <!-- bin 20-30 (2) -->
+        <rect x="300" y="124" width="72" height="52" fill="var(--sage-bg)" stroke="var(--sage)"/>
+        <text x="336" y="118" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-dim)">2</text>
+        <!-- bin 30-45 (2) -->
+        <rect x="380" y="124" width="72" height="52" fill="var(--sage-bg)" stroke="var(--sage)"/>
+        <text x="416" y="118" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-dim)">2</text>
+        <!-- bin 45-60 (1) -->
+        <rect x="460" y="150" width="72" height="26" fill="var(--sage-bg)" stroke="var(--sage)"/>
+        <text x="496" y="144" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-dim)">1</text>
+        <!-- x labels -->
+        <g font-family="var(--mono)" font-size="9.5" fill="var(--ink-dim)" text-anchor="middle">
+          <text x="96"  y="192">&lt;5m</text>
+          <text x="176" y="192">5–10</text>
+          <text x="256" y="192">10–20</text>
+          <text x="336" y="192">20–30</text>
+          <text x="416" y="192">30–45</text>
+          <text x="496" y="192">45–60</text>
+          <text x="323" y="210" fill="var(--ink-faint)">minutes per completed goal</text>
+        </g>
+        <!-- median marker at ~10 min (right edge of 5-10 bin) -->
+        <line x1="212" y1="30" x2="212" y2="176" stroke="var(--brass)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="212" y="24" text-anchor="middle" font-family="var(--display)" font-style="italic" font-size="13" fill="var(--brass)">median ~10m</text>
+        <!-- "a full day would be here →" off chart -->
+        <text x="588" y="60" text-anchor="end" font-family="var(--mono)" font-size="9.5" fill="var(--rust)">a "1–2 day"</text>
+        <text x="588" y="73" text-anchor="end" font-family="var(--mono)" font-size="9.5" fill="var(--rust)">estimate would sit</text>
+        <text x="588" y="86" text-anchor="end" font-family="var(--mono)" font-size="9.5" fill="var(--rust)">~50 charts to the right</text>
+      </svg>
+    </div>
+    <p style="font-size:14px;color:var(--ink-dim);font-family:var(--display);font-style:italic;">The corpus doesn't just correct the bias — it <em>proves</em> it. Claude's real tasks take minutes.</p>
+  </section>
+
+  <!-- ========== [04] THE PIPELINE ========== -->
+  <section>
+    <h2><span class="num">04</span>From transcript to prior</h2>
+    <p class="kicker">a SessionStart hook, running while you're not looking</p>
+    <p>Keeping the corpus fresh has to be cheap, or it can't run at session start. So the hydrate is <em>incremental</em> (only re-scans transcripts touched since last run — ~0.1s steady state) and <em>backgrounded</em> (never blocks startup). It mines new completions, classifies each goal once with a stripped-down headless Haiku call, and pre-digests everything into a compact summary the skill reads instead of the raw rows.</p>
+
+    <div class="pipeline">
+      <svg viewBox="0 0 620 470" role="img" aria-labelledby="pl-t pl-d">
+        <title id="pl-t">temporal-awareness hydrate pipeline</title>
+        <desc id="pl-d">At session start a background hook mines authoritative goal durations from the transcripts, classifies each goal once with a Haiku call, writes a compact bucketed summary, and the skill reads that summary as a prior when estimating.</desc>
+
+        <!-- stage labels -->
+        <text class="glabel" x="24" y="30">session start · background · incremental</text>
+
+        <!-- transcripts (file) -->
+        <rect class="box file" x="24" y="44" width="150" height="56" rx="2"/>
+        <text class="lbl" x="99" y="68" text-anchor="middle">transcripts</text>
+        <text class="sub" x="99" y="83" text-anchor="middle">~/.claude/projects</text>
+        <text class="sub" x="99" y="94" text-anchor="middle">goal_status.durationMs</text>
+
+        <!-- hydrate -->
+        <rect class="box accent" x="235" y="42" width="150" height="60" rx="2"/>
+        <text class="lbl" x="310" y="66" text-anchor="middle">hydrate_corpus.py</text>
+        <text class="sub" x="310" y="80" text-anchor="middle">mine met==true goals</text>
+        <text class="sub" x="310" y="92" text-anchor="middle">exclude idle · dedup</text>
+
+        <!-- haiku -->
+        <rect class="box" x="446" y="42" width="150" height="60" rx="2"/>
+        <text class="lbl" x="521" y="63" text-anchor="middle">claude -p · haiku</text>
+        <text class="sub" x="521" y="77" text-anchor="middle">bucket each goal</text>
+        <text class="sub" x="521" y="89" text-anchor="middle">cached · one-time</text>
+
+        <!-- corpus (file) -->
+        <rect class="box file" x="235" y="176" width="150" height="56" rx="2"/>
+        <text class="lbl" x="310" y="200" text-anchor="middle">goal-measurements</text>
+        <text class="sub" x="310" y="215" text-anchor="middle">one row per goal</text>
+        <text class="sub" x="310" y="226" text-anchor="middle">full prompt + confounds</text>
+
+        <!-- summary (file, accent-ish) -->
+        <rect class="box" x="235" y="286" width="150" height="64" rx="2" style="stroke:var(--sage);stroke-width:1.4;fill:var(--sage-bg);"/>
+        <text class="lbl" x="310" y="310" text-anchor="middle">summary.md</text>
+        <text class="sub" x="310" y="324" text-anchor="middle">Overall + per-bucket</text>
+        <text class="sub" x="310" y="336" text-anchor="middle">median · p10–p90 · O(1)</text>
+
+        <!-- skill (terminal) -->
+        <rect class="box term" x="196" y="400" width="228" height="52" rx="26"/>
+        <text class="lbl" x="310" y="422" text-anchor="middle" style="fill:var(--navy);">agent-time-estimation skill</text>
+        <text class="sub" x="310" y="437" text-anchor="middle">reads the summary as a prior</text>
+
+        <!-- edges -->
+        <!-- transcripts -> hydrate -->
+        <path class="edge" d="M 174 72 L 233 72"/>
+        <polygon class="ahead" points="235,72 227,68 227,76"/>
+        <text class="elabel" x="204" y="64" text-anchor="middle">scan</text>
+        <!-- hydrate -> haiku -->
+        <path class="edge" d="M 385 72 L 444 72"/>
+        <polygon class="ahead" points="446,72 438,68 438,76"/>
+        <text class="elabel" x="415" y="64" text-anchor="middle">new</text>
+        <!-- haiku -> corpus (down-left) -->
+        <path class="edge" d="M 521 102 C 521 150, 400 150, 360 174"/>
+        <polygon class="ahead" points="359,175 368,173 364,166"/>
+        <text class="elabel" x="470" y="145" text-anchor="middle">label</text>
+        <!-- hydrate -> corpus (down) -->
+        <path class="edge" d="M 300 102 L 300 174"/>
+        <polygon class="ahead" points="300,176 296,168 304,168"/>
+        <text class="elabel" x="278" y="142" text-anchor="middle">write</text>
+        <!-- corpus -> summary -->
+        <path class="edge" d="M 310 232 L 310 284"/>
+        <polygon class="ahead" points="310,286 306,278 314,278"/>
+        <text class="elabel" x="286" y="262" text-anchor="middle">aggregate</text>
+        <!-- summary -> skill -->
+        <path class="edge" d="M 310 350 L 310 398"/>
+        <polygon class="ahead" points="310,400 306,392 314,392"/>
+        <text class="elabel" x="286" y="378" text-anchor="middle">read</text>
+      </svg>
+    </div>
+    <p class="kicker" style="margin-top:12px;">flow: top → bottom · everything downstream of the harness's own duration field</p>
+  </section>
+
+  <!-- ========== [05] PRIOR NOT LOOKUP ========== -->
+  <section>
+    <h2><span class="num">05</span>A prior, not a lookup table</h2>
+    <p class="kicker">the strong signal is scale — the medians are soft</p>
+    <p>The temptation is to treat a bucket's median as the answer. The skill is explicit that this is wrong. The corpus's <em>strong</em>, trustworthy signal is <strong>scale</strong>: this work is minutes, not days. The per-bucket medians are much softer, because the categories are coarse — a single bucket holds wildly different tasks.</p>
+
+    <div class="hetero">
+      <div class="hetero__title">bucket: bugfix &nbsp;·&nbsp; median ~7 min &nbsp;·&nbsp; but look at the spread</div>
+      <div class="hetero__bar-wrap">
+        <svg viewBox="0 0 620 92" role="img" aria-label="The bugfix bucket has a median around seven minutes but its real spread runs from a two-minute off-by-one to a multi-hour production incident.">
+          <line x1="30" y1="58" x2="590" y2="58" stroke="var(--rule-bold)"/>
+          <!-- spread band -->
+          <rect x="60" y="50" width="470" height="16" rx="8" fill="var(--brass-bg)" stroke="var(--brass-soft)"/>
+          <!-- median marker -->
+          <line x1="120" y1="38" x2="120" y2="70" stroke="var(--brass)" stroke-width="1.5"/>
+          <text x="120" y="32" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--brass)">median ~7m</text>
+          <!-- low case -->
+          <circle cx="72" cy="58" r="5" fill="var(--sage)"/>
+          <text x="72" y="84" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="var(--sage)">~2 min</text>
+          <!-- high case -->
+          <circle cx="524" cy="58" r="5" fill="var(--rust)"/>
+          <text x="524" y="84" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="var(--rust)">hours</text>
+          <text x="300" y="20" text-anchor="middle" font-family="var(--display)" font-style="italic" font-size="14" fill="var(--ink-dim)">same bucket · same median · not remotely the same task</text>
+        </svg>
+      </div>
+      <div class="hetero__cases">
+        <div class="case case--low">
+          <div class="case__q">bugfix · instance A</div>
+          <div class="case__t">an off-by-one</div>
+          <p class="case__d">Diagnosed, one line, tests already cover it. Sits at or below the low end — near p10.</p>
+        </div>
+        <div class="case case--high">
+          <div class="case__q">bugfix · instance B</div>
+          <div class="case__t">"prod DB got dropped"</div>
+          <p class="case__d">Recovery, verification, blast-radius checks. Sails well past p90 — the median is nearly uninformative here.</p>
+        </div>
+      </div>
+    </div>
+
+    <p>So the skill reads a bucket's <em>spread first, median second</em>, then reasons about <strong>this</strong> task's context — scope, severity, blast radius, ambiguity — and places the estimate on, or beyond, the range. A wide p10–p90 is not noise to average away; it's the signal that context, not the median, decides the number.</p>
+    <blockquote>
+      Bugfixes here have typically run ~7&nbsp;min — but a dropped prod DB is a different animal; recovery and verification push this well past that. An off-by-one would be under it.
+      <span class="attr">— the shape of a well-formed estimate</span>
+    </blockquote>
+  </section>
+
+  <!-- ========== [06] THE THEME ========== -->
+  <section>
+    <h2><span class="num">06</span>Closing the epistemic gap</h2>
+    <p class="kicker">the family resemblance to context-awareness</p>
+    <p>There's a recurring pattern across the <em>agent-autonomy</em> plugins: Claude Code logs a great deal about its own operation, and Claude — the model inside it — rarely looks. Context budget sits in the status line the model never reads. Goal durations sit in transcripts the model never mines.</p>
+    <p>temporal-awareness closes that loop for time the same way <code>context-awareness</code> does for context budget: it takes a signal the harness already produces and hands it back to the model in a form it will actually use. The estimates stop being a borrowed human intuition and start being grounded in Claude's own measured history.</p>
+
+    <div class="callout">
+      <span class="lbl">also handled</span>
+      A wall-clock deadline — <em>"can we have this done by 1pm?"</em> — can't be answered from an estimate alone, because Claude doesn't inherently know the current time. The skill fetches the real clock first, then does the arithmetic: <code>now + execution + critical-path gates</code> vs. the deadline, keeping work-time separate from calendar-time.
+    </div>
+  </section>
+
+  <!-- ========== CODA ========== -->
+  <div class="coda">
+    <p>The interesting part isn't that Claude now quotes a smaller number. It's that the number is finally about the right thing — the agent's own execution, measured against the agent's own history, with the gates that don't collapse named honestly beside it. <em>Accurate, not just smaller</em> — and, increasingly, learned rather than assumed.</p>
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <footer>
+    part of the <span class="accent">really claude code</span> marketplace · agent autonomy<br>
+    plugins for people with a healthy sense of curiosity · MIT 2026 really him
+  </footer>
+
+</article>
+
+</body>
+</html>

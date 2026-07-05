@@ -4,6 +4,9 @@
 
 ## Context-Awareness
 
+> [!NOTE]
+> This plug-in was not designed for use with 1M-token context agents, such as Opus 4.8. I have found it to be counter-productive when used with a large-context agent.
+
 I used to think the status line was just an ornamental thing that had little practical value. I still do, but I used to, too. But one cool thing about it is it keeps track of the context window, and gives you direct access to how much of the context has been consumed. And trying to keep track of that manually is a bit tedious. So that's pretty useful information. But Claude doesn't have any idea what its current context budget is. First, you can just ask it - in my experience its response is usually just dependent on the length of the conversation, something which it does have access to, but not in a very precise way; second, you can look at what information is being passed around when you send a message - it tends to include things like what branch you're on, and the current working directory, but the context budget does not appear to be part of that. So, what would it do if it _did_ have that information?
 
 So this plugin tries to provide that feedback to Claude. There are a few hooks that allow you to add information into the context without interrupting Claude's work - in particular, UserPromptSubmit and PostToolUse(Failure). The plugin leverages those hooks to send little updates to Claude about its context budget as the session goes on. The notifications look like this:

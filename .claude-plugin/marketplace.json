@@ -63,6 +63,20 @@
         "meditation",
         "experimental"
       ]
+    },
+    {
+      "name": "temporal-awareness",
+      "source": "./agent-autonomy/temporal-awareness",
+      "description": "Gives Claude a calibrated sense of how long engineering tasks take when an agent does them \u2014 correcting the human-developer overestimation bias and grounding estimates in measured durations of the user's own completed /goal runs.",
+      "category": "autonomous-agents",
+      "tags": [
+        "agent-performance",
+        "agent-autonomy",
+        "temporal-awareness",
+        "coding-agents",
+        "planning",
+        "autonomous-agents"
+      ]
     }
   ]
 }

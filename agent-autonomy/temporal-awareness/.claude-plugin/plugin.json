@@ -1,0 +1,19 @@
+{
+  "name": "temporal-awareness",
+  "version": "1.0.0",
+  "description": "Gives Claude a calibrated sense of how long engineering tasks actually take when an agent does them — correcting the human-developer overestimation bias and grounding estimates in measured durations of the user's own completed /goal runs.",
+  "author": {
+    "name": "Really Him",
+    "url": "https://github.com/hesreallyhim"
+  },
+  "repository": "https://github.com/hesreallyhim/really-claude-code",
+  "license": "MIT",
+  "keywords": [
+    "agent-performance",
+    "agent-autonomy",
+    "temporal-awareness",
+    "coding-agents",
+    "planning",
+    "autonomous-agents"
+  ]
+}

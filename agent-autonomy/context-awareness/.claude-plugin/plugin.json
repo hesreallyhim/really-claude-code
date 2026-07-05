@@ -1,6 +1,6 @@
 {
   "name": "context-awareness",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Hooks that provide Claude with feedback about its own context budget throughout a session, enabling adaptive, context-aware planning and resource conservation.",
   "author": {
     "name": "Really Him",
